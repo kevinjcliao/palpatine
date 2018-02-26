@@ -3,6 +3,7 @@ module Main
 import Election
 import Parse
 import STV
+import Ballot
 
 
 total

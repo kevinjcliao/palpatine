@@ -1,6 +1,7 @@
 module Parse
 
 import Election
+import Ballot
 
 %access public export
 
