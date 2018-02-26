@@ -1,0 +1,16 @@
+package counter
+
+version    = 0.0.1
+brief      = "Palpatine is an STV Vote Counter in Idris"
+
+author     = Kevin Liao <me@liaokev.in>
+license    = BSD3
+homepage   = https://github.com/kevinjcliao/palpatine
+sourceloc  = git@github.com:kevinjcliao/palpatine.git
+bugtracker = https://github.com/kevinjcliao/palpatine/issues
+
+sourcedir  = src
+modules    = Test
+tests      = Test.spec
+executable = counter
+main       = Main
