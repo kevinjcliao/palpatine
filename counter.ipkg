@@ -15,6 +15,6 @@ modules    = Test
             , Election
             , Parse
 tests      = Test.spec
-            , Test.stv
+            , Test.testDroopQuota
 executable = counter
 main       = Main
