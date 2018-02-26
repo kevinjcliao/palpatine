@@ -27,8 +27,8 @@ instance Eq Cand where
     C == C = True
     _ == _ = False
 
-cand_all : List Cand
-cand_all = [A,B,C]
+candAll : List Cand
+candAll = [A,B,C]
 
 candidate : String -> Maybe Cand
 candidate "A" = Just A
