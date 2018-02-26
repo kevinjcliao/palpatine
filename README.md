@@ -1,6 +1,7 @@
 # Palpatine: STV Vote Counter
 
 ![Chancellor Palpatine][palpatine]
+
 > The Senate will decide your fate.  
 > I am the senate.  
 > -(Mace Windu and Chancellor Palpatine, 19BBY). 
