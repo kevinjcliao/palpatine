@@ -11,6 +11,10 @@ bugtracker = https://github.com/kevinjcliao/palpatine/issues
 
 sourcedir  = src
 modules    = Test
+            , STV
+            , Election
+            , Parse
 tests      = Test.spec
+            , Test.stv
 executable = counter
 main       = Main
