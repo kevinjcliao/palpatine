@@ -4,6 +4,7 @@ import Election
 
 %access public export
 
+total
 parseChopped : List String -> Maybe (List Cand)
 parseChopped [] = Just []
 parseChopped (x :: xs) = do
@@ -11,6 +12,7 @@ parseChopped (x :: xs) = do
     rest <- parseChopped xs
     pure (cand :: rest)
 
+total
 parseBallot : String -> Maybe Ballot
 parseBallot str = do
     let noFirstChar = drop 1 $ unpack str;
@@ -20,8 +22,10 @@ parseBallot str = do
     result <- parseChopped pieces
     pure (result, 1)
 
+total
 splitToStringBallots : String -> List String
 splitToStringBallots = split (== '\n')
 
+total
 parseBallots : String -> List Ballot
 parseBallots str = mapMaybe parseBallot (splitToStringBallots str)

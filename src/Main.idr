@@ -5,6 +5,7 @@ import Parse
 import STV
 
 
+total
 main : IO ()
 main = do
     Right file <- readFile votes
