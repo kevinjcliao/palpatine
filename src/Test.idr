@@ -1,7 +1,7 @@
 module Test
 
-import Election
 import STV
+import Election
 
 %access public export
 
@@ -15,3 +15,6 @@ spec = assertEq 1 1
 
 testDroopQuota : IO ()
 testDroopQuota = assertEq (droopQuota 4376143 6) 625164
+
+testInitiateCount : IO ()
+testInitiateCount = assertEq (show $ initiateCount [A,B,C]) (show [(A,0), (B,0), (C,0)])

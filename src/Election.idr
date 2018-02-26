@@ -2,6 +2,10 @@ module Election
 
 %access public export
 
+-- Set this to be the election data being parsed.
+votes : String
+votes = "small_election.txt"
+
 -- Set this to the number of candidates being elected.
 seats : Int
 seats = 2

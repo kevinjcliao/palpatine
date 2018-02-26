@@ -16,5 +16,6 @@ modules    = Test
             , Parse
 tests      = Test.spec
             , Test.testDroopQuota
+            , Test.testInitiateCount
 executable = counter
 main       = Main
