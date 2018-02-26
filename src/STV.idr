@@ -1,6 +1,8 @@
 module STV
 
 import Election
+import Ballot
+import VoteCount
 
 %access public export
 
@@ -25,7 +27,13 @@ droopQuota intBallots intSeats =
 -- Initiate count takes the list of candidates and generates
 -- a list of tuples with [(Cand, 0)]
 total
-initiateCount : List Cand -> List (Cand, Double)
+initiateCount : List Cand -> VoteCount
 initiateCount = map toTuple where
     toTuple : Cand -> (Cand, Double)
     toTuple cand = (cand, 0)
+
+-- To count first prefs, you need: 
+-- List of ballots. List of candidates. 
+total
+countFirstPrefs : List Ballot -> VoteCount -> (List Ballot, VoteCount)
+countFirstPrefs ballots count = (processedBallots, newCount)

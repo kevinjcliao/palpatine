@@ -23,9 +23,6 @@ instance Show Cand where
 cand_all : List Cand
 cand_all = [A,B,C]
 
-Ballot : Type
-Ballot = (List Cand, Double)
-
 candidate : String -> Maybe Cand
 candidate "A" = Just A
 candidate "B" = Just B
