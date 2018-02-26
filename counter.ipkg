@@ -17,5 +17,7 @@ modules    = Test
 tests      = Test.spec
             , Test.testDroopQuota
             , Test.testInitiateCount
+            , Test.testGetVoteForCandidate
+            , Test.testAddVote
 executable = counter
 main       = Main

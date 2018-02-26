@@ -34,6 +34,6 @@ initiateCount = map toTuple where
 
 -- To count first prefs, you need: 
 -- List of ballots. List of candidates. 
-total
-countFirstPrefs : List Ballot -> VoteCount -> (List Ballot, VoteCount)
-countFirstPrefs ballots count = (processedBallots, newCount)
+-- total
+-- countFirstPrefs : List Ballot -> VoteCount -> (List Ballot, VoteCount)
+-- countFirstPrefs ballots count = (processedBallots, newCount)
