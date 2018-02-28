@@ -6,23 +6,6 @@ import Data.Vect
 
 %access public export
 
-data Ev : Type -> Type where
-   ExVect : Vect n a -> Ev a
-
-Candidate : Type
-Candidate = String
-
-Candidates : Nat -> Type
-Candidates n = Vect n Candidate
-
-total
-parseChopped : List String -> Maybe (List Cand)
-parseChopped [] = Just []
-parseChopped (x :: xs) = do
-    cand <- candidate x
-    rest <- parseChopped xs
-    pure (cand :: rest)
-
 total
 parseList : String -> Maybe $ List String
 parseList str = do
@@ -32,27 +15,9 @@ parseList str = do
     let pieces = split (==',') cutString
     pure pieces
 
--- total
--- parseBallot : String -> Maybe Ballot
--- parseBallot str = do
---     let pieces = parseList str
---     result <- parseChopped pieces
---     pure (result, 1)
-
 total
 splitToStringBallots : String -> List String
 splitToStringBallots = split (== '\n')
-
--- total
--- parseBallots : String -> List Ballot
--- parseBallots str = mapMaybe parseBallot (splitToStringBallots str)
-
-||| This expects to fail if there are more candidates than 
--- partial
--- parseCands : (n : Nat) -> List Candidate -> Ev String
--- parseCands Z     _              = Nil
--- -- parseCands (S n) []             = Nil
--- parseCands (S n) (cand :: rest) = cand :: parseCands n rest
 
 toVec1 : List a -> Ev a
 toVec1 []     = ExVect Nil

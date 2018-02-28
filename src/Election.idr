@@ -1,6 +1,17 @@
 module Election
 
+import Data.Vect
+
 %access public export
+
+data Ev : Type -> Type where
+    ExVect : Vect n a -> Ev a
+ 
+Candidate : Type
+Candidate = String
+
+Candidates : Nat -> Type
+Candidates n = Vect n Candidate
 
 -- Set this to be the election data being parsed.
 votes : String
@@ -9,29 +20,3 @@ votes = "small_election.txt"
 -- Set this to the number of candidates being elected.
 seats : Int
 seats = 2
-
-data Cand =
-    A
-    | B
-    | C
-
-instance Show Cand where
-    show A = "A"
-    show B = "B"
-    show C = "C"
-
--- Okay this is really annoying. 
-instance Eq Cand where
-    A == A = True
-    B == B = True
-    C == C = True
-    _ == _ = False
-
-candAll : List Cand
-candAll = [A,B,C]
-
-candidate : String -> Maybe Cand
-candidate "A" = Just A
-candidate "B" = Just B
-candidate "C" = Just C
-candidate error = Nothing

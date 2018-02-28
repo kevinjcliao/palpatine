@@ -4,11 +4,19 @@ module VoteCount
 
 import Election
 import Ballot
+import Data.SortedMap
+import Data.Vect
 
 %access public export
 
--- VoteCount : Type
--- VoteCount = List (Cand, Double)
+VoteCount : Type
+VoteCount = SortedMap Candidate Double
+
+initVoteCount : Candidates n -> VoteCount -> VoteCount
+initVoteCount Nil vc = vc
+initVoteCount (x :: xs) vc = initVoteCount xs vc2 where
+    vc2 : VoteCount
+    vc2 = insert x 0 vc
 
 -- -- Adds a value to the vote count of a candidate.    
 -- total
