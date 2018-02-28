@@ -14,6 +14,7 @@ modules    = Test
             , STV
             , Election
             , Parse
+            , VoteCount
 tests      = Test.spec
             , Test.testDroopQuota
             , Test.testInitiateCount
@@ -21,3 +22,4 @@ tests      = Test.spec
             , Test.testAddVote
 executable = counter
 main       = Main
+opts       = "-p contrib"
