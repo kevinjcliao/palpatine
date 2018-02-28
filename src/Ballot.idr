@@ -4,9 +4,12 @@ import Election
 
 %access public export
 
+VoteValue : Type
+VoteValue = Double
+
 total
 Ballot : Type
-Ballot = (List String, Double)
+Ballot = (List String, VoteValue)
 
 total
 ballotValue : Ballot -> Double

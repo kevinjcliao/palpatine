@@ -10,13 +10,21 @@ import Data.Vect
 %access public export
 
 VoteCount : Type
-VoteCount = SortedMap Candidate Double
+VoteCount = SortedMap Candidate VoteValue
 
 initVoteCount : Candidates n -> VoteCount -> VoteCount
 initVoteCount Nil vc = vc
 initVoteCount (x :: xs) vc = initVoteCount xs vc2 where
     vc2 : VoteCount
     vc2 = insert x 0 vc
+
+addValue : Candidate -> VoteValue -> VoteCount -> VoteCount
+addValue = insert
+
+getVoteVal : Candidate -> VoteCount -> Maybe VoteValue
+getVoteVal = lookup
+
+
 
 -- -- Adds a value to the vote count of a candidate.    
 -- total

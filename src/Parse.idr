@@ -25,7 +25,7 @@ toVec1 (x :: xs) = case toVec1 xs of ExVect xs' => ExVect (x :: xs')
 
 ||| This is a use of dependent types. 
 partial
-readFirstLine : String -> Maybe (Ev String)
+readFirstLine : String -> Maybe (Ev Candidate)
 readFirstLine input = do
     let splitted = split (== ':') input
     strCand <- head' splitted
