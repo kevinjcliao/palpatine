@@ -18,36 +18,23 @@ initVoteCount (x :: xs) vc = initVoteCount xs vc2 where
     vc2 : VoteCount
     vc2 = insert x 0 vc
 
+private
 addValue : Candidate -> VoteValue -> VoteCount -> VoteCount
 addValue = insert
 
 getVoteVal : Candidate -> VoteCount -> Maybe VoteValue
 getVoteVal = lookup
 
+addVoteVal : Candidate -> VoteValue -> VoteCount -> VoteCount
+addVoteVal can val vc = vc2 where
+    origVal : VoteValue
+    origVal = case getVoteVal can vc of
+        Just v  => v
+        Nothing => 0
+    newVal : VoteValue
+    newVal = origVal + val
+    vc2 : VoteCount
+    vc2 = addValue can newVal vc
 
-
--- -- Adds a value to the vote count of a candidate.    
--- total
--- addValue : VoteCount -> Cand -> Double -> VoteCount
--- addValue []                        _    _      = []
--- addValue (head@(cand1, origVal) :: rest) cand2 newVal = 
---     if cand1 == cand2 then
---         ((cand1, origVal + newVal) :: rest)
---     else
---         (head :: addValue rest cand2 newVal)
-
--- total
--- getVoteForCandidate : VoteCount -> Cand -> Maybe Double
--- getVoteForCandidate [] _                        = Nothing
--- getVoteForCandidate ((cand1, val) :: rest) cand2   =
---     if cand1 == cand2 then
---         Just val
---     else
---         getVoteForCandidate rest cand2
-
--- total
--- addVote : VoteCount -> Ballot -> Maybe VoteCount
--- addVote vc b = do
---     let voteVal = ballotValue b
---     cand <- nextCand b
---     pure $ addValue vc cand voteVal
+decVoteVal : Candidate -> VoteValue -> VoteCount -> VoteCount
+decVoteVal can val vc = addVoteVal can (-1 * val) vc
