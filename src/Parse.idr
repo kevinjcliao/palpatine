@@ -80,4 +80,9 @@ readBallots str = map initBallot listOfPrefs where
 
 parseInput : String -> Maybe (Ev String, List Ballot)
 parseInput str = do
-    
+    let lines = splitToStringBallots str
+    firstLine <- head' lines
+    let rest = drop 1 lines
+    candidates <- readFirstLine firstLine
+    let ballots = readBallots rest
+    pure (candidates, ballots)
