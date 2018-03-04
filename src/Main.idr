@@ -1,6 +1,6 @@
 module Main
 
-import Election
+import Candidates
 import Parse
 import STV
 import Ballot

@@ -1,4 +1,4 @@
-module Election
+module Candidates
 
 import Data.Vect
 

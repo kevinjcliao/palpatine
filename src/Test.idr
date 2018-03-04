@@ -1,7 +1,7 @@
 module Test
 
 import STV
-import Election
+import Candidates
 import VoteCount
 import Ballot
 
