@@ -20,42 +20,42 @@ splitToStringBallots : String -> List String
 splitToStringBallots = split (== '\n')
 
 total
-toVec1 : List a -> Ev a
-toVec1 []     = ExVect Nil
-toVec1 (x :: xs) = case toVec1 xs of ExVect xs' => ExVect (x :: xs')
+toVec : List a -> Ev a
+toVec []     = ExVect Nil
+toVec (x :: xs) = case toVec xs of ExVect xs' => ExVect (x :: xs')
 
 ||| This is a use of dependent types. 
 total
-readFirstLine : String -> Maybe (Ev Candidate)
+readFirstLine : String -> Maybe $ Ev Candidate
 readFirstLine input = do
     let splitted = split (== ':') input
     strCand <- head' splitted
     strNum <- last' splitted
     listCand <- parseList strCand
-    pure $ toVec1 listCand
+    pure $ toVec listCand
 
-parseBallot : Candidates n -> List Candidate  -> Ballot
+-- How do I prove this???? 
+parseBallot : Candidates n -> List Candidate  -> Ballot2 n
 parseBallot cands strs = (prefs, 1) where
-    getCandAsNat : Candidate -> Maybe Nat
-    getCandAsNat cand = case elemIndex cand cands of
-        Just ind => Just $ cast ind
+    getCandAsNat : Candidates n -> Candidate -> Maybe $ Fin n
+    getCandAsNat _ cand = case elemIndex cand cands of
+        Just ind => Just ind
         Nothing  => Nothing
     prefs : List Nat
-    prefs = mapMaybe getCandAsNat strs
+    prefs = mapMaybe (getCandAsNat cands strs) cands
 
--- First line of file not included. Everything else. 
 total
-readBallots : List Candidate -> Ev Candidate -> List Ballot
-readBallots str (ExVect cands) = map (parseBallot cands) listOfPrefs where
+readBallots : String -> Candidates n -> List $ Ballot2 n
+readBallots input cands = map (parseBallot cands) listOfPrefs where
+    lines : List String
+    lines = drop 1 $ splitToStringBallots input
     listOfPrefs : List $ List String
-    listOfPrefs = mapMaybe parseList str
+    listOfPrefs = mapMaybe parseList lines
 
 total
-parseInput : String -> Maybe (Ev Candidate, List Ballot)
-parseInput str = do
-    let lines = splitToStringBallots str
+getCandidates : String -> Maybe $ Ev Candidate
+getCandidates input = do
+    let lines = splitToStringBallots input
     firstLine <- head' lines
-    let rest = drop 1 lines
     candidates <- readFirstLine firstLine
-    let ballots = readBallots rest candidates
-    pure (candidates, ballots)
+    pure candidates

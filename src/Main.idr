@@ -14,5 +14,5 @@ main = do
         | Left err => printLn err
     printLn $ show $ parseList "[1,2,3]"
     case parseInput file of
-        Just (ExVect x, ls) => printLn $ "The candidates are: " ++ show x ++ " and the ballots are: " ++ show ls
+        Just (ExVect x) => printLn $ "The ballots are: " ++ (show $ readBallots file x) ++ " and the candidates are: " ++ (show x)
         Nothing => printLn "Parse failed."

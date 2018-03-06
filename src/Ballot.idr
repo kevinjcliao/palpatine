@@ -12,20 +12,22 @@ total
 Ballot : Type
 Ballot = (List Nat, VoteValue)
 
+-- New ballot type has a list of fins and
+-- a double as a pair. 
 total
 Ballot2 : Nat -> Type
 Ballot2 n = (List (Fin n), VoteValue)
 
 total
-ballotValue : Ballot -> Double
+ballotValue : Ballot2 n -> Double
 ballotValue (_, val) = val
 
 total
-nextCand : Ballot -> Maybe Nat
+nextCand : Ballot2 n -> Maybe $ Fin n
 nextCand ([], _)          = Nothing
 nextCand ((cand :: _), _) = Just cand
 
 total
-restCand : Ballot -> Maybe $ List Nat
+restCand : Ballot2 n -> Maybe $ List $ Fin n
 restCand ([], _)          = Nothing
 restCand ((_ :: rest), _) = Just rest
