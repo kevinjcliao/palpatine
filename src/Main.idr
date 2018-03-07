@@ -13,6 +13,6 @@ main = do
     Right file <- readFile votes
         | Left err => printLn err
     printLn $ show $ parseList "[1,2,3]"
-    case parseInput file of
-        Just (ExVect x) => printLn $ "The ballots are: " ++ (show $ readBallots file x) ++ " and the candidates are: " ++ (show x)
+    case getCandidates file of
+        Just (ExVect x) => printLn "Hi!"
         Nothing => printLn "Parse failed."

@@ -19,6 +19,12 @@ total
 splitToStringBallots : String -> List String
 splitToStringBallots = split (== '\n')
 
+-- toVec : List a -> (n ** Vect n a)
+toVec2 : List a -> (n ** Vect n a)
+toVec2 []      = (Z ** Nil)
+toVec2 (x :: xs) = case toVec2 xs of
+    (ns ** rest) => ((S ns) ** (x :: rest)) 
+
 total
 toVec : List a -> Ev a
 toVec []     = ExVect Nil
@@ -36,13 +42,11 @@ readFirstLine input = do
 
 -- How do I prove this???? 
 parseBallot : Candidates n -> List Candidate  -> Ballot2 n
-parseBallot cands strs = (prefs, 1) where
-    getCandAsNat : Candidates n -> Candidate -> Maybe $ Fin n
-    getCandAsNat _ cand = case elemIndex cand cands of
-        Just ind => Just ind
-        Nothing  => Nothing
-    prefs : List Nat
-    prefs = mapMaybe (getCandAsNat cands strs) cands
+parseBallot {n} cands strs = (prefs, 1) where
+    getCandAsFin : Candidate -> Maybe $ Fin n
+    getCandAsFin cand = elemIndex cand cands
+    prefs : List $ Fin n
+    prefs = mapMaybe getCandAsFin strs
 
 total
 readBallots : String -> Candidates n -> List $ Ballot2 n
