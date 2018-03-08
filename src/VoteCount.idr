@@ -13,7 +13,7 @@ VoteCount : Type
 VoteCount = SortedMap Candidate VoteValue
 
 ElectedCandidates : Type
-ElectedCandidates = Ev Candidate
+ElectedCandidates = ExVect Candidate
 
 total
 initVoteCount : Candidates n -> VoteCount -> VoteCount

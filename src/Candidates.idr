@@ -4,8 +4,8 @@ import Data.Vect
 
 %access public export
 
-data Ev : Type -> Type where
-    ExVect : Vect n a -> Ev a
+ExVect : Type -> Type
+ExVect t = (n ** Vect n t)
  
 Candidate : Type
 Candidate = String
