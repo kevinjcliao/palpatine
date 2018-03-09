@@ -3,6 +3,7 @@ module STV
 import Candidates
 import Ballot
 import VoteCount
+import Data.Vect
 
 %access public export
 
@@ -31,3 +32,16 @@ import VoteCount
 --         Just newVc => count rest newVc
 --         Nothing => vc
 --     newCount = count ballots vc
+
+countBallots : Candidates n -> 
+    List (Ballot n) -> 
+    VoteCount ->
+    (seats : Nat) -> 
+    Candidates seats
+countBallots _ _ _ Z     = Nil
+countBallots _ _ _ (S n) = 
+
+nextCandidate : Candidates n -> 
+    List (Ballot n) ->
+    VoteCount ->
+    (Candidate, Candidates )
