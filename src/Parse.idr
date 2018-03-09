@@ -36,7 +36,7 @@ readFirstLine input = do
     listCand <- parseList strCand
     pure $ toVec listCand
 
-parseBallot : Candidates x -> List Candidate  -> Ballot2 x
+parseBallot : Candidates x -> List Candidate  -> Ballot x
 parseBallot {x} cands strs = (prefs, 1) where
     getCandAsFin : Candidate -> Maybe $ Fin x
     getCandAsFin cand = elemIndex cand cands
@@ -44,7 +44,7 @@ parseBallot {x} cands strs = (prefs, 1) where
     prefs = mapMaybe getCandAsFin strs
 
 total
-readBallots : String -> (y ** Vect y Candidate) -> List $ Ballot2 y
+readBallots : String -> (y ** Vect y Candidate) -> List $ Ballot y
 readBallots input (_ ** cands) = map (parseBallot cands) listOfPrefs where
     lines : List String
     lines = drop 1 $ splitToStringBallots input
