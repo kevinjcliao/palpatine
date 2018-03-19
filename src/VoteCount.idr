@@ -22,26 +22,28 @@ initVoteCount (x :: xs) vc = initVoteCount xs vc2 where
     vc2 : VoteCount
     vc2 = insert x 0 vc
 
-private
-total
-addValue : Candidate -> VoteValue -> VoteCount -> VoteCount
-addValue = insert
 
 total
 getVoteVal : Candidate -> VoteCount -> Maybe VoteValue
 getVoteVal = lookup
 
+
 total
 addVoteVal : Candidate -> VoteValue -> VoteCount -> VoteCount
-addVoteVal can val vc = vc2 where
-    origVal : VoteValue
-    origVal = case getVoteVal can vc of
-        Just v  => v
-        Nothing => 0
-    newVal : VoteValue
-    newVal = origVal + val
-    vc2 : VoteCount
-    vc2 = addValue can newVal vc
+addVoteVal cand newVoteVal vc = insert cand val vc where
+    oldVal : VoteValue
+    oldVal = case getVoteVal cand vc of
+        Just fromVc => fromVc
+        Nothing     => 0
+    val : VoteValue
+    val = oldVal + newVoteVal
+
+-- addVoteVal indexes 
+total
+addValue : Fin n -> Candidates n -> VoteValue -> VoteCount -> VoteCount
+addValue candAsFin cands val vc = addVoteVal cand val vc where
+    cand : Candidate
+    cand = index candAsFin cands
 
 total
 decVoteVal : Candidate -> VoteValue -> VoteCount -> VoteCount
