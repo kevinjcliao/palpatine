@@ -16,11 +16,13 @@ ElectedCandidates : Type
 ElectedCandidates = ExVect Candidate
 
 total
-initVoteCount : Candidates n -> VoteCount -> VoteCount
-initVoteCount Nil vc = vc
-initVoteCount (x :: xs) vc = initVoteCount xs vc2 where
-    vc2 : VoteCount
-    vc2 = insert x 0 vc
+initVoteCount : Candidates n -> VoteCount
+initVoteCount cands = helper cands empty where
+    helper : Candidates n -> VoteCount -> VoteCount
+    helper Nil vc = vc
+    helper (x :: xs) vc = helper xs vc2 where
+        vc2 : VoteCount
+        vc2 = insert x 0 vc
 
 
 total
@@ -40,8 +42,8 @@ addVoteVal cand newVoteVal vc = insert cand val vc where
 
 -- addVoteVal indexes 
 total
-addValue : Fin n -> Candidates n -> VoteValue -> VoteCount -> VoteCount
-addValue candAsFin cands val vc = addVoteVal cand val vc where
+addVote : Fin n -> Candidates n -> VoteValue -> VoteCount -> VoteCount
+addVote candAsFin cands val vc = addVoteVal cand val vc where
     cand : Candidate
     cand = index candAsFin cands
 
