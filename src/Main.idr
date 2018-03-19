@@ -39,7 +39,9 @@ main = do
         | Left err => printLn err
     -- Parsing is broken so we'll simulate parsing working
     -- for now. 
-
     let cands = sampleCandidates
     let ballots = sampleBallots
-    printLn "Hello, world."
+    let initialCount = initVoteCount cands
+    let count1 = firstCount cands ballots initialCount
+    let dq = droopQuota 5 seats
+    printLn $ getElectedCands cands count1 dq

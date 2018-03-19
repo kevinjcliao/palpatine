@@ -21,6 +21,7 @@ droopQuota intBallots intSeats =
         flooredFirstDiv : Int
         flooredFirstDiv = cast $ numBallots / (numSeats + 1)
 
+total
 firstCount : Candidates n -> List (Ballot n) -> VoteCount -> VoteCount
 firstCount cands [] vc = vc
 firstCount cands (bal :: rest) vc = 
@@ -28,12 +29,21 @@ firstCount cands (bal :: rest) vc =
     newVc : VoteCount
     newVc = case bal of
         ((cand :: _), val) => addVote cand cands val vc
+        ([], _)            => vc
 
-electCandidate : Candidates (S n) -> 
-    List (Ballot (S n)) ->
-    VoteCount ->
-    (Candidate, Candidates n, List (Ballot n), VoteCount)
-electCandidate _ _ _ = ?electCandidateHole
+total
+getElectedCands : Candidates n -> VoteCount -> Int -> (p ** Candidates p)
+getElectedCands cands vc dq = filter isOverQuota cands where
+    isOverQuota : Candidate -> Bool
+    isOverQuota cand = case getVoteVal cand vc of 
+        Just voteVal => voteVal >= cast dq
+        Nothing      => False
+
+-- electCandidate : Candidates (S n) -> 
+--     List (Ballot (S n)) ->
+--     VoteCount ->
+--     (Candidate, Candidates n, List (Ballot n), VoteCount)
+-- electCandidate _ _ _ = ?electCandidateHole
 
 -- countBallots : Candidates n -> 
 --     List (Ballot n) -> 
