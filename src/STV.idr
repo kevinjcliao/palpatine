@@ -99,3 +99,11 @@ chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
 -- countBallots _     _       _  Z     = Nil
 -- countBallots cands ballots vc (S n) = case electCandidate cands ballots vc of
 --     (elected, newCands, newBalls, vc) => (elected :: countBallots newCands newBalls, vc)
+
+||| Running an STV election involves taking in the candidates, the seats, the
+||| ballots and producing a list of candidates to take that seat. 
+stv : Candidates n 
+    -> List $ Ballots n 
+    -> (seats : Nat) 
+    -> (Candidates seats, Candidates, n - seats)
+stv = ?stv
