@@ -6,6 +6,7 @@ import STV
 import Ballot
 import VoteCount
 import Data.Vect
+import Data.SortedMap
 
 
 -- Sample ballots: 
@@ -46,3 +47,5 @@ main = do
     let count1 = firstCount cands ballots initialCount
     let dq = droopQuota 5 seats
     printLn $ getElectedCands cands count1 dq
+    case chooseToEliminate count1 cands of
+        (eliminated, vc2, _) => printLn eliminated

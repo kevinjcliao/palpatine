@@ -3,6 +3,7 @@ module Parse
 import Candidates
 import Ballot
 import Data.Vect
+import Data.SortedMap
 
 %access public export
 

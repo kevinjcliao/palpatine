@@ -64,32 +64,26 @@ chooseToEliminate : VoteCount
                 -> Candidates (S n) 
                 -> (Candidate, VoteCount, Candidates n)
 chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
-    getIndiceOfLowestCand : Candidates n -> Fin y -> Fin y -> Fin y
-    -- What's the bloody base case? 
-    getIndiceOfLowestCand Nil       lowestIndex _     = lowestIndex
-    getIndiceOflowestCand (x :: xs) lowestIndex index = 
-        if nextVal < lowestVal
-            then getIndiceOfLowestCand xs index       (FS index)
-            else getIndiceOfLowestCand xs lowestIndex (FS index)
-        where
-            lowestCand : Candidate
-            lowestCand = getCand lowestIndex cands
-            lowestVal : VoteValue
-            lowestVal = case getVoteVal lowestCand vc of
-                Just val => val
-                Nothing  => ?noIdeaWhatWeShouldDoHere
-            nextVal : VoteValue
-            nextVal = case getVoteVal x vc of
-                Just val => val
-                Nothing  => lowestVal + 1
-    lowestCandIndice : Fin (S n)
-    lowestCandIndice = getIndiceOfLowestCand cands FZ
+    getVal : Candidate -> VoteValue
+    getVal cand = case getVoteVal cand vc of
+        Just val => val
+        Nothing  => -1
+    candVoteVals : Vect (S n) VoteValue
+    candVoteVals = map getVal cands
+    isLowestVal : VoteValue -> Bool
+    isLowestVal v = case takeWhile (< v) candVoteVals of
+                (Z ** _) => True
+                (_ ** _) => False
+    lowestCandIndex : Fin (S n)
+    lowestCandIndex = case findIndex isLowestVal candVoteVals of
+        Just ind => ind
+        Nothing  => FZ
     lowestCand : Candidate
-    lowestCand = getCand lowestCandIndice cands
+    lowestCand = getCand lowestCandIndex cands
     newVc : VoteCount
     newVc = deleteCandidate lowestCand vc
     newCandidates : Candidates n
-    newCandidates = removeCand lowestCandIndice cands
+    newCandidates = removeCand lowestCandIndex cands
 
 -- countBallots : Candidates n -> 
 --     List (Ballot n) -> 
@@ -100,10 +94,10 @@ chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
 -- countBallots cands ballots vc (S n) = case electCandidate cands ballots vc of
 --     (elected, newCands, newBalls, vc) => (elected :: countBallots newCands newBalls, vc)
 
-||| Running an STV election involves taking in the candidates, the seats, the
-||| ballots and producing a list of candidates to take that seat. 
-stv : Candidates n 
-    -> List $ Ballots n 
-    -> (seats : Nat) 
-    -> (Candidates seats, Candidates, n - seats)
-stv = ?stv
+--||| Running an STV election involves taking in the candidates, the seats, the
+--||| ballots and producing a list of candidates to take that seat. 
+-- stv : Candidates n 
+--     -> List $ Ballot n 
+--     -> (seats : Nat) 
+--     -> (Candidates seats, Candidates (n - seats))
+-- stv = ?stv
