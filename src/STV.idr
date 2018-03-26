@@ -71,7 +71,7 @@ chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
     candVoteVals : Vect (S n) VoteValue
     candVoteVals = map getVal cands
     isLowestVal : VoteValue -> Bool
-    isLowestVal v = case takeWhile (< v) candVoteVals of
+    isLowestVal v = case filter (< v) candVoteVals of
                 (Z ** _) => True
                 (_ ** _) => False
     lowestCandIndex : Fin (S n)
@@ -84,15 +84,6 @@ chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
     newVc = deleteCandidate lowestCand vc
     newCandidates : Candidates n
     newCandidates = removeCand lowestCandIndex cands
-
--- countBallots : Candidates n -> 
---     List (Ballot n) -> 
---     VoteCount ->
---     (seats : Nat) -> 
---     Candidates seats
--- countBallots _     _       _  Z     = Nil
--- countBallots cands ballots vc (S n) = case electCandidate cands ballots vc of
---     (elected, newCands, newBalls, vc) => (elected :: countBallots newCands newBalls, vc)
 
 --||| Running an STV election involves taking in the candidates, the seats, the
 --||| ballots and producing a list of candidates to take that seat. 
