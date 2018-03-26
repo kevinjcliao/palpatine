@@ -33,6 +33,7 @@ ballot5 = ([2,1,0], 1)
 sampleBallots : List $ Ballot 3
 sampleBallots = [ballot1, ballot2, ballot3, ballot4, ballot5]
 
+total
 main : IO ()
 main = do
     Right file <- readFile votes

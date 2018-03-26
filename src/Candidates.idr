@@ -13,6 +13,12 @@ Candidate = String
 Candidates : Nat -> Type
 Candidates n = Vect n Candidate
 
+getCand : Fin n -> Candidates n -> Candidate
+getCand = index
+
+removeCand : Fin (S n) -> Candidates (S n) -> Candidates n
+removeCand = deleteAt
+
 -- Set this to be the election data being parsed.
 -- TODO: Parse this as a command line argument! 
 votes : String

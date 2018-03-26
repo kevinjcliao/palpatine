@@ -50,3 +50,6 @@ addVote candAsFin cands val vc = addVoteVal cand val vc where
 total
 decVoteVal : Candidate -> VoteValue -> VoteCount -> VoteCount
 decVoteVal can val vc = addVoteVal can (-1 * val) vc
+
+deleteCandidate : Candidate -> VoteCount -> VoteCount
+deleteCandidate = delete
