@@ -56,6 +56,7 @@ isEwin (S n) (x :: xs) = case isEwin n xs of
     Nothing  => Nothing
     Just vec => Just (x :: vec)
 
+total
 getLowestIndex : Vect (S n) VoteValue -> (VoteValue, Fin (S n))
 getLowestIndex (x :: Nil) = (x, FZ)
 getLowestIndex (x :: xs@(_ :: _))  = case getLowestIndex xs of
@@ -67,7 +68,8 @@ getLowestIndex (x :: xs@(_ :: _))  = case getLowestIndex xs of
                 (x, FZ)
 
 ||| Maps through the HashMap and chooses the least popular candidate
-||| to eliminate. Returns the candidate eliminated, and the new VoteCount. 
+||| to eliminate. Returns the candidate eliminated, and the new VoteCount.
+total 
 chooseToEliminate : VoteCount 
                 -> Candidates (S n) 
                 -> (Candidate, VoteCount, Candidates n)
