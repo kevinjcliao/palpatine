@@ -91,10 +91,10 @@ chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
     newCandidates : Candidates n
     newCandidates = removeCand lowestCandIndex cands
 
---||| Running an STV election involves taking in the candidates, the seats, the
---||| ballots and producing a list of candidates to take that seat. 
--- stv : Candidates n 
---     -> List $ Ballot n 
---     -> (seats : Nat) 
---     -> (Candidates seats, Candidates (n - seats))
--- stv = ?stv
+||| Running an STV election involves taking in the candidates, the seats, the
+||| ballots and producing a list of candidates to take that seat. 
+stv : Candidates (x + seats)
+    -> List $ Ballot (x + seats) 
+    -> (seats : Nat) 
+    -> (Candidates seats, Candidates (x))
+stv = ?stv
