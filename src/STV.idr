@@ -56,10 +56,18 @@ isEwin (S n) (x :: xs) = case isEwin n xs of
     Nothing  => Nothing
     Just vec => Just (x :: vec)
 
+getLowestIndex : Vect (S n) VoteValue -> (VoteValue, Fin (S n))
+getLowestIndex (x :: Nil) = (x, FZ)
+getLowestIndex (x :: xs@(_ :: _))  = case getLowestIndex xs of
+    (lowestVal, lowestIndex) => 
+        if lowestVal < x
+            then
+                (lowestVal, FS lowestIndex)
+            else
+                (x, FZ)
 
-
--- Maps through the HashMap and chooses the least popular candidate
--- to eliminate. Returns the candidate eliminated, and the new VoteCount. 
+||| Maps through the HashMap and chooses the least popular candidate
+||| to eliminate. Returns the candidate eliminated, and the new VoteCount. 
 chooseToEliminate : VoteCount 
                 -> Candidates (S n) 
                 -> (Candidate, VoteCount, Candidates n)
@@ -70,16 +78,12 @@ chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
         Nothing  => -1
     candVoteVals : Vect (S n) VoteValue
     candVoteVals = map getVal cands
-    isLowestVal : VoteValue -> Bool
-    isLowestVal v = case filter (< v) candVoteVals of
-                (Z ** _) => True
-                (_ ** _) => False
     lowestCandIndex : Fin (S n)
-    lowestCandIndex = case findIndex isLowestVal candVoteVals of
-        Just ind => ind
-        Nothing  => FZ
+    lowestCandIndex = case getLowestIndex candVoteVals of
+        (_, i) => i
     lowestCand : Candidate
-    lowestCand = getCand lowestCandIndex cands
+    lowestCand = case getLowestIndex candVoteVals of
+        (lowestVal, lowestIndex) => getCand lowestIndex cands
     newVc : VoteCount
     newVc = deleteCandidate lowestCand vc
     newCandidates : Candidates n
