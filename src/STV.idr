@@ -70,10 +70,10 @@ getLowestIndex (x :: xs@(_ :: _))  = case getLowestIndex xs of
 ||| Maps through the HashMap and chooses the least popular candidate
 ||| to eliminate. Returns the candidate eliminated, and the new VoteCount.
 total 
-chooseToEliminate : VoteCount 
+eliminate : VoteCount 
                 -> Candidates (S n) 
                 -> (Candidate, VoteCount, Candidates n)
-chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
+eliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
     getVal : Candidate -> VoteValue
     getVal cand = case getVoteVal cand vc of
         Just val => val
@@ -90,6 +90,25 @@ chooseToEliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
     newVc = deleteCandidate lowestCand vc
     newCandidates : Candidates n
     newCandidates = removeCand lowestCandIndex cands
+
+||| Reindexes a ballot according to the new candidates after one
+||| has been elected or eliminated. 
+redoBallot : (elected : Candidate)
+            -> (former : Candidates (S n))
+            -> (new : Candidates n)
+            -> (oldBallot : Ballot (S n))
+            -> Ballot n
+redoBallot = ?redohole
+
+
+||| Maps through the ballots, selecting th
+redoBallots : (elected : Candidate)
+            -> (former : Candidates (S n))
+            -> (new : Candidates n)
+            -> (oldBallots : List $ Ballot (S n))
+            -> List $ Ballot n
+redoBallots elected former new oldBallots = 
+    map (redoBallot elected former new) oldBallots
 
 ||| Running an STV election involves taking in the candidates, the seats, the
 ||| ballots and producing a list of candidates to take that seat. 
