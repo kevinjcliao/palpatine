@@ -91,17 +91,33 @@ eliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
     newCandidates : Candidates n
     newCandidates = removeCand lowestCandIndex cands
 
+
+total   
+reindexPref : (former : Candidates (S n))
+            -> (new : Candidates n)
+            -> (prev : Fin (S n))
+            -> Maybe $ Fin n
+reindexPref former new oldPref = findIndex (==candidate) new where
+    candidate : Candidate
+    candidate = index oldPref former
+
+
 ||| Reindexes a ballot according to the new candidates after one
 ||| has been elected or eliminated. 
+total
 redoBallot : (elected : Candidate)
             -> (former : Candidates (S n))
             -> (new : Candidates n)
             -> (oldBallot : Ballot (S n))
             -> Ballot n
-redoBallot = ?redohole
+redoBallot cand former new (oldPrefs, val) = 
+    ( mapMaybe (reindexPref former new) oldPrefs
+    , val
+    )
 
 
 ||| Maps through the ballots, selecting th
+total
 redoBallots : (elected : Candidate)
             -> (former : Candidates (S n))
             -> (new : Candidates n)
@@ -112,6 +128,7 @@ redoBallots elected former new oldBallots =
 
 ||| Running an STV election involves taking in the candidates, the seats, the
 ||| ballots and producing a list of candidates to take that seat. 
+total
 stv : Candidates (x + seats)
     -> List $ Ballot (x + seats) 
     -> (seats : Nat) 
