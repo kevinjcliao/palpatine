@@ -42,11 +42,13 @@ getElectedCands cands vc dq = filter isOverQuota cands where
         Just voteVal => voteVal >= cast dq
         Nothing => False
 
-electCandidate : Candidates (S n) -> 
-    List (Ballot (S n)) ->
-    VoteCount ->
-    (Candidate, Candidates n, List (Ballot n), VoteCount)
-electCandidate _ _ _ = ?electCandidateHole
+-- electCandidate : (remaining : Candidates (S n))
+--                -> (elected : Candidates p)
+--                ->  Candidate 
+--                -> List (Ballot (S n)) 
+--                -> VoteCount
+--                -> (Candidates n, Candidates (S p), List (Ballot n), VoteCount)
+-- electCandidate remaining elected cand ballots vc = 
 
 isEwin : (n : Nat) -> (electedCands : Candidates x) -> Maybe (Candidates n)
 isEwin Z (x :: xs)     = Nothing
@@ -101,6 +103,8 @@ reindexPref former new oldPref = findIndex (==candidate) new where
     candidate : Candidate
     candidate = index oldPref former
 
+||| revalueBallot takes a ballot and a new vote value and
+||| creates a new one. 
 revalueBallot : (value : VoteValue)
               -> (cand : Candidate)
               -> (cands : Candidates n)
