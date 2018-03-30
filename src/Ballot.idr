@@ -25,6 +25,10 @@ ballotValue : Ballot n -> Double
 ballotValue (_, val) = val
 
 total
+newBallotVal : Ballot n -> Double -> Ballot n
+newBallotVal (prefs, _) newVal = (prefs, newVal)
+
+total
 nextCand : Ballot n -> Maybe $ Fin n
 nextCand ([], _)          = Nothing
 nextCand ((cand :: _), _) = Just cand

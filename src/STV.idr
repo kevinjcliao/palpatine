@@ -101,6 +101,31 @@ reindexPref former new oldPref = findIndex (==candidate) new where
     candidate : Candidate
     candidate = index oldPref former
 
+revalueBallot : (value : VoteValue)
+              -> (cand : Candidate)
+              -> (cands : Candidates n)
+              -> (ballot : Ballot n)
+              -> Ballot n
+revalueBallot val cand cands bal@(Nil, _)      = bal
+revalueBallot val cand cands bal@((x :: _), _) = 
+    if (index x cands) == cand
+        then newBallotVal bal val
+        else bal
+
+||| Revalues the ballots that were responsible for electing
+||| the candidate that was just elected. 
+revalue : (elected : Candidate)
+        -> (droopQuota : Int)
+        -> (candScore : VoteValue)
+        -> (cands : Candidates n)
+        -> (oldBallots : List $ Ballot n)
+        -> List $ Ballot n
+revalue cand dq score cands ballots = 
+    map (revalueBallot newVal cand cands) ballots where
+        surplus : VoteValue
+        surplus = score - (cast dq)
+        newVal : VoteValue
+        newVal = surplus / score
 
 ||| Reindexes a ballot according to the new candidates after one
 ||| has been elected or eliminated. 
