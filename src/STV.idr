@@ -42,21 +42,18 @@ getElectedCands cands vc dq = filter isOverQuota cands where
         Just voteVal => voteVal >= cast dq
         Nothing => False
 
--- electCandidate : (remaining : Candidates (S n))
---                -> (elected : Candidates p)
---                ->  Candidate 
---                -> List (Ballot (S n)) 
---                -> VoteCount
---                -> (Candidates n, Candidates (S p), List (Ballot n), VoteCount)
--- electCandidate remaining elected cand ballots vc = 
 
-isEwin : (n : Nat) -> (electedCands : Candidates x) -> Maybe (Candidates n)
-isEwin Z (x :: xs)     = Nothing
-isEwin (S n) Nil       = Nothing
-isEwin Z Nil           = Just Nil
-isEwin (S n) (x :: xs) = case isEwin n xs of
-    Nothing  => Nothing
-    Just vec => Just (x :: vec)
+||| isEwin checks to make sure that the number of elected candidates is the
+||| same as the number of seats available. What happens when there are less
+||| candidates than there are seats available? 
+isEwin : (n : Nat) -> (electedCands : Candidates x) -> Bool
+-- Case 1: Less seats than there are candidates?? What do we do in this case...
+isEwin Z (x :: xs)     = True
+-- Case 2: Less candidates than there are seats available: False.
+isEwin (S n) Nil       = False
+-- Case 3: No seats left and same number of candidates: True.
+isEwin Z Nil           = True
+isEwin (S n) (x :: xs) = isEwin n xs
 
 total
 getLowestIndex : Vect (S n) VoteValue -> (VoteValue, Fin (S n))
@@ -93,16 +90,6 @@ eliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
     newCandidates : Candidates n
     newCandidates = removeCand lowestCandIndex cands
 
-
-total   
-reindexPref : (former : Candidates (S n))
-            -> (new : Candidates n)
-            -> (prev : Fin (S n))
-            -> Maybe $ Fin n
-reindexPref former new oldPref = findIndex (==candidate) new where
-    candidate : Candidate
-    candidate = index oldPref former
-
 ||| revalueBallot takes a ballot and a new vote value and
 ||| creates a new one. 
 revalueBallot : (value : VoteValue)
@@ -131,6 +118,15 @@ revalue cand dq score cands ballots =
         newVal : VoteValue
         newVal = surplus / score
 
+total   
+reindexPref : (former : Candidates (S n))
+            -> (new : Candidates n)
+            -> (prev : Fin (S n))
+            -> Maybe $ Fin n
+reindexPref former new oldPref = findIndex (==candidate) new where
+    candidate : Candidate
+    candidate = index oldPref former
+
 ||| Reindexes a ballot according to the new candidates after one
 ||| has been elected or eliminated. 
 total
@@ -154,6 +150,28 @@ redoBallots : (elected : Candidate)
             -> List $ Ballot n
 redoBallots elected former new oldBallots = 
     map (redoBallot elected former new) oldBallots
+
+-- TODO: Transfer the surplus!!! 
+electCandidate : (remaining : Candidates (S n))
+               -> (elected : Candidates p)
+               -> (candIndex : Fin (S n)) 
+               -> List (Ballot (S n)) 
+               -> VoteCount
+               -> (Candidates n, Candidates (S p), List (Ballot n), VoteCount)
+electCandidate {n} {p} remaining elected cand ballots vc = 
+    (newCands, electedCands, newBallots, newVc) where
+        electedCand : Candidate
+        electedCand = index cand remaining
+        newCands : Candidates n
+        newCands = removeCand cand remaining
+        newBallots : List (Ballot n)
+        newBallots = redoBallots electedCand remaining newCands ballots
+        electedCands : Candidates (S p)
+        electedCands = (electedCand :: elected)
+        newVc : VoteCount
+        newVc = deleteCandidate electedCand vc
+
+-- electCandidates should map through the elected candidates and elect each one. 
 
 ||| Running an STV election involves taking in the candidates, the seats, the
 ||| ballots and producing a list of candidates to take that seat. 
