@@ -70,9 +70,11 @@ getLowestIndex (x :: xs@(_ :: _))  = case getLowestIndex xs of
 ||| to eliminate. Returns the candidate eliminated, and the new VoteCount.
 total 
 eliminate : VoteCount 
-                -> Candidates (S n) 
-                -> (Candidate, VoteCount, Candidates n)
-eliminate {n} vc cands = (lowestCand, newVc, newCandidates) where
+          -> Candidates (S n)
+          -> List $ Ballot (S n)
+          -> (Candidate, VoteCount, Candidates n, List $ Ballot n)
+eliminate {n} vc cands ballots = 
+    (lowestCand, newVc, newCandidates, ?newBallots) where
     getVal : Candidate -> VoteValue
     getVal cand = case getVoteVal cand vc of
         Just val => val
@@ -171,13 +173,42 @@ electCandidate {n} {p} remaining elected cand ballots vc =
         newVc : VoteCount
         newVc = deleteCandidate electedCand vc
 
+canElect : VoteCount -> Candidates (S n) -> Maybe $ Fin (S n)
+canElect = ?canElect
+
 -- electCandidates should map through the elected candidates and elect each one. 
+||| Question for Richard: How do I tell the compiler that this
+||| is never gonna be called with the zero case????
+||| You can use Typed Holes as error messages and that's really stupid! 
+results : (seats : Nat)
+        -> (cands : Candidates (S n))
+        -> (elected : Candidates e)
+        -> (ballots : List $ Ballot (S n))
+        -> (vc : VoteCount)
+        -> (Candidates (S e), Candidates (n))
+results {n} {e} seats cands elected ballots vc = case seats of
+    Z            => ?error
+    nonZeroSeats => case cands of
+        cand :: Nil      => ((cand :: elected), Nil)
+        moreThanOneCands => case canElect vc moreThanOneCands of
+            Just candIndex => ?electACandidate
+            Nothing => ?timeToEliminate
+
+        
 
 ||| Running an STV election involves taking in the candidates, the seats, the
-||| ballots and producing a list of candidates to take that seat. 
+||| ballots and producing a list of candidates to take the seats. 
+||| Returns a tuple of elected candidates and unelected candidates.
 total
-stv : Candidates (x + seats)
+stv : (seats : Nat) 
+    -> Candidates (x + seats)
     -> List $ Ballot (x + seats) 
-    -> (seats : Nat) 
     -> (Candidates seats, Candidates (x))
-stv = ?stv
+stv seats cands ballots = ?stvhole where
+    emptyVc : VoteCount
+    emptyVc = initVoteCount cands
+    init : VoteCount
+    init = firstCount cands ballots emptyVc
+    elected : (Candidates seats, Candidates n)
+    elected = ?electedHole
+    

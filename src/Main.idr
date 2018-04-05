@@ -47,5 +47,5 @@ main = do
     let count1 = firstCount cands ballots initialCount
     let dq = droopQuota 5 seats
     printLn $ getElectedCands cands count1 dq
-    case eliminate count1 cands of
-        (eliminated, vc2, _) => printLn eliminated
+    case eliminate count1 cands ballots of
+        (eliminated, vc2, _, _) => printLn eliminated
