@@ -226,20 +226,20 @@ electHighestCand {n} {e} cands elected ballots vc = (newElected, newRemaining) w
         (remaining, _, _, _) => remaining
 
 
--- -- electCandidates should map through the elected candidates and elect each one. 
--- ||| Question for Richard: How do I tell the compiler that this
--- ||| is never gonna be called with the zero case????
--- ||| You can use Typed Holes as error messages and that's really stupid! 
--- electOne : (cands : Candidates (S n))
---          -> (elected : Candidates e)
---          -> (ballots : List $ Ballot (S n))
---          -> (vc : VoteCount)
---          -> (Candidates (S e), Candidates n)
--- electOne {n} {e} cands elected ballots vc = case cands of
---     cand :: Nil      => ((cand :: elected), Nil)
---     moreThanOneCands => case canElect vc moreThanOneCands of
---         Just candIndex => electHighestCand cands elected ballots vc
---         Nothing => ?timeToEliminate
+-- electCandidates should map through the elected candidates and elect each one. 
+||| You can use Typed Holes as error messages and that's really stupid! 
+total
+electOne : (cands : Candidates (S n))
+         -> (elected : Candidates e)
+         -> (ballots : List $ Ballot (S n))
+         -> (vc : VoteCount)
+         -> (Candidates (S e), Candidates n)
+electOne {n} {e} cands elected ballots vc = case cands of
+    cand :: Nil      => ((cand :: elected), Nil)
+    moreThanOneCands => case canElect vc moreThanOneCands of
+        Just candIndex => electHighestCand cands elected ballots vc
+        -- Problem... I don't think I can prove totality here... 
+        Nothing        => ?totalityIsWeird
 
         
 
