@@ -1,10 +1,9 @@
 module Main
 
 import Candidates
-import Parse
+-- import Parse
 import STV
 import Ballot
-import VoteCount
 import Data.Vect
 import Data.SortedMap
 
@@ -14,7 +13,11 @@ import Data.SortedMap
 -- for the small_election.txt succeeded. We will run an election on
 -- this small data set. 
 sampleCandidates : Candidates 3
-sampleCandidates = ["A", "B", "C"]
+sampleCandidates = 
+    [ MkCandidate "A" 0
+    , MkCandidate "B" 0
+    , MkCandidate "C" 0
+    ]
 
 ballot1 : Ballot 3
 ballot1 = ([0,2], 1)
@@ -37,14 +40,14 @@ sampleBallots = [ballot1, ballot2, ballot3, ballot4, ballot5]
 total
 main : IO ()
 main = do
-    Right file <- readFile votes
-        | Left err => printLn err
-    -- Parsing is broken so we'll simulate parsing working
-    -- for now. 
-    let cands = sampleCandidates
-    let ballots = sampleBallots
-    let initialCount = initVoteCount cands
-    let count1 = firstCount cands ballots initialCount
-    let dq = droopQuota 5 seats
-    printLn $ getElectedCands cands count1 dq
+    -- Right file <- readFile votes
+    --     | Left err => printLn err
+    -- -- Parsing is broken so we'll simulate parsing working
+    -- -- for now. 
+    -- let cands = sampleCandidates
+    -- let ballots = sampleBallots
+    -- let initialCount = initVoteCount cands
+    -- let count1 = firstCount cands ballots initialCount
+    -- let dq = droopQuota 5 seats
+    -- printLn $ getElectedCands cands count1 dq
     printLn "Nothing works at the moment."
