@@ -68,15 +68,15 @@ getLowestIndex (x :: xs@(_ :: _))  = case getLowestIndex xs of
                 (x, FZ)
 
 total
-getHighestIndex : Vect (S n) VoteValue -> (VoteValue, Fin (S n))
-getHighestIndex (x :: Nil) = (x, FZ)
+getHighestIndex : Vect (S n) VoteValue -> (Fin (S n), VoteValue)
+getHighestIndex (x :: Nil) = (FZ, x)
 getHighestIndex (x :: xs@(_ :: _))  = case getHighestIndex xs of
-    (highestVal, highestIndex) => 
+    (highestIndex, highestVal) => 
         if highestVal > x
             then
-                (highestVal, FS highestIndex)
+                (FS highestIndex, highestVal)
             else
-                (x, FZ)
+                (FZ, x)
 
 elimCandFromBallot : Fin n -> Ballot n -> Ballot n
 elimCandFromBallot index b@(cands, v) = (filter (/= index) cands, v)
@@ -114,15 +114,14 @@ eliminate {n} vc cands ballots =
 
 ||| Returns the highest candidate. 
 highestCandIndex : VoteCount 
-    -> Candidates (S n)
-    -> List $ Ballot (S n)
-    -> Fin $ S n
+                -> Candidates (S n)
+                -> List $ Ballot (S n)
+                -> (Fin $ S n, VoteValue)
 highestCandIndex {n} vc cands ballots = highestCand where
     voteVals : Vect (S n) VoteValue
     voteVals = candVoteVals cands vc
-    highestCand : Fin $ S n
-    highestCand = case getHighestIndex voteVals of
-        (_, i) => i
+    highestCand : (Fin $ S n, VoteValue)
+    highestCand = getHighestIndex voteVals
 
 ||| revalueBallot takes a ballot and a new vote value and
 ||| creates a new one. 
@@ -188,18 +187,27 @@ redoBallots elected former new oldBallots =
 -- TODO: Transfer the surplus!!! 
 electCandidate : (remaining : Candidates (S n))
                -> (elected : Candidates p)
-               -> (candIndex : Fin (S n)) 
+               -> (candIndex : Fin (S n))
+               -> (candValue : VoteValue)
                -> List (Ballot (S n)) 
                -> VoteCount
+               -> (dq : Int)
                -> (Candidates n, Candidates (S p), List (Ballot n), VoteCount)
-electCandidate {n} {p} remaining elected cand ballots vc = 
+electCandidate {n} {p} remaining elected cand vv ballots vc dq = 
     (newCands, electedCands, newBallots, newVc) where
         electedCand : Candidate
         electedCand = index cand remaining
         newCands : Candidates n
         newCands = removeCand cand remaining
+        ballotsWithNewValue : List $ Ballot $ S n
+        ballotsWithNewValue = revalue electedCand dq vv remaining ballots
+        removeBallotHead : Ballot r -> Ballot r
+        removeBallotHead b@([], v)     = ([], v)
+        removeBallotHead b@(x :: xs, v) = (xs, v)
+        ballotsWithoutHead : List $ Ballot $ S n
+        ballotsWithoutHead = map removeBallotHead ballotsWithNewValue
         newBallots : List (Ballot n)
-        newBallots = redoBallots electedCand remaining newCands ballots
+        newBallots = redoBallots electedCand remaining newCands ballotsWithoutHead
         electedCands : Candidates (S p)
         electedCands = (electedCand :: elected)
         newVc : VoteCount
@@ -212,12 +220,17 @@ electHighestCand : (cands : Candidates (S n))
                  -> (elected : Candidates e)
                  -> (ballots : List $ Ballot (S n))
                  -> (vc : VoteCount)
+                 -> (dq : Int)
                  -> (Candidates (S e), Candidates n)
-electHighestCand {n} {e} cands elected ballots vc = (newElected, newRemaining) where
-    toElect : Fin $ S n
+electHighestCand {n} {e} cands elected ballots vc dq = (newElected, newRemaining) where
+    toElect : (Fin $ S n, VoteValue)
     toElect = highestCandIndex vc cands ballots
+    toElectIndex : Fin $ S n
+    toElectIndex = case toElect of (i, _) => i
+    toElectValue : VoteValue
+    toElectValue = case toElect of (_, v) => v
     newStuff : (Candidates n, Candidates (S e), List (Ballot n), VoteCount)
-    newStuff = electCandidate cands elected toElect ballots vc
+    newStuff = electCandidate cands elected toElectIndex toElectValue ballots vc dq
     newElected : Candidates (S e)
     newElected = case newStuff of
         (_, elected, _, _) => elected
@@ -233,11 +246,12 @@ electOne : (cands : Candidates (S n))
          -> (elected : Candidates e)
          -> (ballots : List $ Ballot (S n))
          -> (vc : VoteCount)
-         -> (Candidates (S e), Candidates n)
-electOne {n} {e} cands elected ballots vc = case cands of
+         -> (dq : Int)
+         -> (numEliminated : Nat ** (Candidates (S e), Candidates (n - numEliminated))
+electOne {n} {e} cands elected ballots vc dq = case cands of
     cand :: Nil      => ((cand :: elected), Nil)
     moreThanOneCands => case canElect vc moreThanOneCands of
-        Just candIndex => electHighestCand cands elected ballots vc
+        Just candIndex => electHighestCand cands elected ballots vc dq
         -- Problem... I don't think I can prove totality here... 
         Nothing        => ?totalityIsWeird
 

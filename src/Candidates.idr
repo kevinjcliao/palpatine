@@ -8,10 +8,13 @@ ExVect : Type -> Type
 ExVect t = (n ** Vect n t)
  
 Candidate : Type
-Candidate = String
+Candidate = (String, VoteValue)
 
 Candidates : Nat -> Type
 Candidates n = Vect n Candidate
+
+Judged : Type
+
 
 getCand : Fin n -> Candidates n -> Candidate
 getCand = index

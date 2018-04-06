@@ -14,12 +14,6 @@ total
 Ballot : Nat -> Type
 Ballot n = (List (Fin n), VoteValue)
 
--- implementation Show (List (Ballot n)) where
---     show n = "hello world"
-
---- implementation Show (Ballot n) where
---    show (ls, val) = "(" ++ (show ls) ++ ", " ++ (show val) ++ ")"
-
 total
 ballotValue : Ballot n -> Double
 ballotValue (_, val) = val
