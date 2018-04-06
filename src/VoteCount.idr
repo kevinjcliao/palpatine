@@ -12,9 +12,6 @@ import Data.Vect
 VoteCount : Type
 VoteCount = SortedMap Candidate VoteValue
 
-ElectedCandidates : Type
-ElectedCandidates = ExVect Candidate
-
 total
 initVoteCount : Candidates n -> VoteCount
 initVoteCount cands = helper cands empty where
@@ -29,6 +26,14 @@ total
 getVoteVal : Candidate -> VoteCount -> Maybe VoteValue
 getVoteVal = lookup
 
+total
+getVal : VoteCount -> Candidate -> VoteValue
+getVal vc cand = case getVoteVal cand vc of
+    Just val => val
+    Nothing  => -1
+
+candVoteVals : Candidates n -> VoteCount -> Vect n VoteValue
+candVoteVals cands vc = map (getVal vc) cands
 
 total
 addVoteVal : Candidate -> VoteValue -> VoteCount -> VoteCount

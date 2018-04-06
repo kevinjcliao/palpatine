@@ -4,6 +4,7 @@ import Candidates
 import Ballot
 import VoteCount
 import Data.Vect
+import Data.SortedMap
 
 %access public export
 
@@ -66,6 +67,18 @@ getLowestIndex (x :: xs@(_ :: _))  = case getLowestIndex xs of
             else
                 (x, FZ)
 
+total
+getHighestIndex : Vect (S n) VoteValue -> (VoteValue, Fin (S n))
+getHighestIndex (x :: Nil) = (x, FZ)
+getHighestIndex (x :: xs@(_ :: _))  = case getHighestIndex xs of
+    (highestVal, highestIndex) => 
+        if highestVal > x
+            then
+                (highestVal, FS highestIndex)
+            else
+                (x, FZ)
+                
+
 ||| Maps through the HashMap and chooses the least popular candidate
 ||| to eliminate. Returns the candidate eliminated, and the new VoteCount.
 total 
@@ -75,22 +88,30 @@ eliminate : VoteCount
           -> (Candidate, VoteCount, Candidates n, List $ Ballot n)
 eliminate {n} vc cands ballots = 
     (lowestCand, newVc, newCandidates, ?newBallots) where
-    getVal : Candidate -> VoteValue
-    getVal cand = case getVoteVal cand vc of
-        Just val => val
-        Nothing  => -1
-    candVoteVals : Vect (S n) VoteValue
-    candVoteVals = map getVal cands
+    voteVals : Vect (S n) VoteValue
+    voteVals = candVoteVals cands vc
     lowestCandIndex : Fin (S n)
-    lowestCandIndex = case getLowestIndex candVoteVals of
+    lowestCandIndex = case getLowestIndex voteVals of
         (_, i) => i
     lowestCand : Candidate
-    lowestCand = case getLowestIndex candVoteVals of
+    lowestCand = case getLowestIndex voteVals of
         (lowestVal, lowestIndex) => getCand lowestIndex cands
     newVc : VoteCount
     newVc = deleteCandidate lowestCand vc
     newCandidates : Candidates n
     newCandidates = removeCand lowestCandIndex cands
+
+||| Returns the highest candidate. 
+highestCandIndex : VoteCount 
+    -> Candidates (S n)
+    -> List $ Ballot (S n)
+    -> Fin $ S n
+highestCandIndex {n} vc cands ballots = highestCand where
+    voteVals : Vect (S n) VoteValue
+    voteVals = candVoteVals cands vc
+    highestCand : Fin $ S n
+    highestCand = case getHighestIndex voteVals of
+        (_, i) => i
 
 ||| revalueBallot takes a ballot and a new vote value and
 ||| creates a new one. 
@@ -176,23 +197,38 @@ electCandidate {n} {p} remaining elected cand ballots vc =
 canElect : VoteCount -> Candidates (S n) -> Maybe $ Fin (S n)
 canElect = ?canElect
 
--- electCandidates should map through the elected candidates and elect each one. 
-||| Question for Richard: How do I tell the compiler that this
-||| is never gonna be called with the zero case????
-||| You can use Typed Holes as error messages and that's really stupid! 
-results : (seats : Nat)
-        -> (cands : Candidates (S n))
-        -> (elected : Candidates e)
-        -> (ballots : List $ Ballot (S n))
-        -> (vc : VoteCount)
-        -> (Candidates (S e), Candidates (n))
-results {n} {e} seats cands elected ballots vc = case seats of
-    Z            => ?error
-    nonZeroSeats => case cands of
-        cand :: Nil      => ((cand :: elected), Nil)
-        moreThanOneCands => case canElect vc moreThanOneCands of
-            Just candIndex => ?electACandidate
-            Nothing => ?timeToEliminate
+electHighestCand : (cands : Candidates (S n))
+                 -> (elected : Candidates e)
+                 -> (ballots : List $ Ballot (S n))
+                 -> (vc : VoteCount)
+                 -> (Candidates (S e), Candidates n)
+electHighestCand {n} {e} cands elected ballots vc = (newElected, newRemaining) where
+    toElect : Fin $ S n
+    toElect = highestCandIndex vc cands ballots
+    newStuff : (Candidates n, Candidates (S e), List (Ballot n), VoteCount)
+    newStuff = electCandidate cands elected toElect ballots vc
+    newElected : Candidates (S e)
+    newElected = case newStuff of
+        (_, elected, _, _) => elected
+    newRemaining : Candidates n
+    newRemaining = case newStuff of
+        (remaining, _, _, _) => remaining
+
+
+-- -- electCandidates should map through the elected candidates and elect each one. 
+-- ||| Question for Richard: How do I tell the compiler that this
+-- ||| is never gonna be called with the zero case????
+-- ||| You can use Typed Holes as error messages and that's really stupid! 
+-- electOne : (cands : Candidates (S n))
+--          -> (elected : Candidates e)
+--          -> (ballots : List $ Ballot (S n))
+--          -> (vc : VoteCount)
+--          -> (Candidates (S e), Candidates n)
+-- electOne {n} {e} cands elected ballots vc = case cands of
+--     cand :: Nil      => ((cand :: elected), Nil)
+--     moreThanOneCands => case canElect vc moreThanOneCands of
+--         Just candIndex => electHighestCand cands elected ballots vc
+--         Nothing => ?timeToEliminate
 
         
 
@@ -203,12 +239,12 @@ total
 stv : (seats : Nat) 
     -> Candidates (x + seats)
     -> List $ Ballot (x + seats) 
-    -> (Candidates seats, Candidates (x))
-stv seats cands ballots = ?stvhole where
+    -> (Candidates seats, Candidates x)
+stv seats cands ballots = elected where
     emptyVc : VoteCount
     emptyVc = initVoteCount cands
     init : VoteCount
     init = firstCount cands ballots emptyVc
-    elected : (Candidates seats, Candidates n)
+    elected : (Candidates seats, Candidates x)
     elected = ?electedHole
     
