@@ -77,17 +77,27 @@ getHighestIndex (x :: xs@(_ :: _))  = case getHighestIndex xs of
                 (highestVal, FS highestIndex)
             else
                 (x, FZ)
-                
+
+elimCandFromBallot : Fin n -> Ballot n -> Ballot n
+elimCandFromBallot index b@(cands, v) = (filter (/= index) cands, v)
+
+||| Only should be called from eliminate. 
+total
+elimCandFromBallots : List $ Ballot n -> Fin n -> List $ Ballot n
+elimCandFromBallots ballots index = map (elimCandFromBallot index) ballots
 
 ||| Maps through the HashMap and chooses the least popular candidate
-||| to eliminate. Returns the candidate eliminated, and the new VoteCount.
+||| to eliminate. Returns the new ballots with that candidate
+||| eliminated. NOTE: Does not eliminate the candidate from
+||| remaining. We do this to preserve the relationship where
+||| elected + remaining is always the same number. 
 total 
 eliminate : VoteCount 
           -> Candidates (S n)
           -> List $ Ballot (S n)
-          -> (Candidate, VoteCount, Candidates n, List $ Ballot n)
+          -> (Candidate, VoteCount, List $ Ballot $ S n)
 eliminate {n} vc cands ballots = 
-    (lowestCand, newVc, newCandidates, ?newBallots) where
+    (lowestCand, newVc, newBallots) where
     voteVals : Vect (S n) VoteValue
     voteVals = candVoteVals cands vc
     lowestCandIndex : Fin (S n)
@@ -98,8 +108,9 @@ eliminate {n} vc cands ballots =
         (lowestVal, lowestIndex) => getCand lowestIndex cands
     newVc : VoteCount
     newVc = deleteCandidate lowestCand vc
-    newCandidates : Candidates n
-    newCandidates = removeCand lowestCandIndex cands
+    newBallots : List $ Ballot (S n)
+    newBallots = elimCandFromBallots ballots lowestCandIndex
+
 
 ||| Returns the highest candidate. 
 highestCandIndex : VoteCount 
