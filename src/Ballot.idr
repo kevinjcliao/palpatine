@@ -14,6 +14,9 @@ total
 Ballot : Nat -> Type
 Ballot n = (List (Fin n), VoteValue)
 
+Ballots : Nat -> Type
+Ballots n = List $ Ballot n
+
 total
 ballotValue : Ballot n -> Double
 ballotValue (_, val) = val

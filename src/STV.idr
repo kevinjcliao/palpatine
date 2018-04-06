@@ -255,6 +255,16 @@ electOne {n} {e} cands elected ballots vc dq = case cands of
         -- Problem... I don't think I can prove totality here... 
         Nothing        => ?totalityIsWeird
 
+total
+processOne : (seats : Nat)
+        -> (remaining : Candidates (S n))
+        -> (results : Results n)
+        -> (ballots : List $ Ballot (S n))
+        -> (dq : Int)
+        -> (Candidates n, Results (S n), Ballots n)
+processOne Z (cand :: cands) results _ _ = 
+        
+
         
 
 ||| Running an STV election involves taking in the candidates, the seats, the
