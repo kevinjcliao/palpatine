@@ -61,17 +61,6 @@ import Data.SortedMap
 --             else
 --                 (x, FZ)
 
--- total
--- getHighestIndex : Vect (S n) VoteValue -> (Fin (S n), VoteValue)
--- getHighestIndex (x :: Nil) = (FZ, x)
--- getHighestIndex (x :: xs@(_ :: _))  = case getHighestIndex xs of
---     (highestIndex, highestVal) => 
---         if highestVal > x
---             then
---                 (FS highestIndex, highestVal)
---             else
---                 (FZ, x)
-
 -- elimCandFromBallot : Fin n -> Ballot n -> Ballot n
 -- elimCandFromBallot index b@(cands, v) = (filter (/= index) cands, v)
 
@@ -233,47 +222,32 @@ import Data.SortedMap
 --         (remaining, _, _, _) => remaining
 
 
--- -- electCandidates should map through the elected candidates and elect each one. 
--- ||| You can use Typed Holes as error messages and that's really stupid! 
--- total
--- electOne : (cands : Candidates (S n))
---          -> (elected : Candidates e)
---          -> (ballots : List $ Ballot (S n))
---          -> (vc : VoteCount)
---          -> (dq : Int)
---          -> (numEliminated : Nat ** (Candidates (S e), Candidates (n - numEliminated))
--- electOne {n} {e} cands elected ballots vc dq = case cands of
---     cand :: Nil      => ((cand :: elected), Nil)
---     moreThanOneCands => case canElect vc moreThanOneCands of
---         Just candIndex => electHighestCand cands elected ballots vc dq
---         -- Problem... I don't think I can prove totality here... 
---         Nothing        => ?totalityIsWeird
+-- electCandidates should map through the elected candidates and elect each one. 
+||| You can use Typed Holes as error messages and that's really stupid! 
+total
+electOne : Election (S r) j -> Election r (S j)
+electOne = ?electOneHole
+
+total
+elimOne : Election (S r) j -> Election r (S j)
+elimOne = ?elimOneHole
+
+weCanElect : Int -> Candidates n -> Bool
+weCanElect = ?canElect
 
 notElectedHead : Election (S r) j -> Election r (S j)
 notElectedHead election@(dq, seats, ballots, (x :: xs), results) = 
     makeElection dq seats ?ballots xs ((dontElect x) :: results)
 
-
 processOne : Election (S r) j -> Election r (S j)
-processOne election@(dq, Z, ballots, (x :: Nil), results) = notElectedHead election
-processOne election@(dq, Z, ballots, (x :: xs), results)  = processOne $ notElectedHead election
-
-
-        
+processOne election@(_, Z, _, _, _)          = notElectedHead election
+processOne election@(dq, (S n), _, cands, _) = 
+    if weCanElect dq cands
+        then electOne election
+        else elimOne election
 
 -- ||| Running an STV election involves taking in the candidates, the seats, the
 -- ||| ballots and producing a list of candidates to take the seats. 
 -- ||| Returns a tuple of elected candidates and unelected candidates.
--- total
--- stv : (seats : Nat) 
---     -> Candidates (x + seats)
---     -> List $ Ballot (x + seats) 
---     -> (Candidates seats, Candidates x)
--- stv seats cands ballots = elected where
---     emptyVc : VoteCount
---     emptyVc = initVoteCount cands
---     init : VoteCount
---     init = firstCount cands ballots emptyVc
---     elected : (Candidates seats, Candidates x)
---     elected = ?electedHole
-    
+stv : Election r Z -> Election Z r
+stv e@(_, _, _, Nil, _) = e

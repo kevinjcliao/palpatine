@@ -18,6 +18,13 @@ record Candidate where
     candName : CandidateName
     candValue : VoteValue
 
+implementation Eq Candidate where
+    (==) cand1 cand2 = (candValue cand1) == (candValue cand2)
+
+implementation Ord Candidate where
+    compare cand1 cand2 = 
+        compare (candValue cand1) (candValue cand2)
+
 Candidates : Nat -> Type
 Candidates n = Vect n Candidate
 
@@ -27,8 +34,6 @@ implementation Eq Judgment where
     (==) Elected Elected = True
     (==) NotElected NotElected = True
     (==) _ _ = False
-
-
 
 record Judged where
     constructor MkJudgment
@@ -47,6 +52,28 @@ getCandVal i cands = candValue $ getCand i cands
 getCandName : Fin n -> Candidates n -> CandidateName
 getCandName i cands = candName $ getCand i cands
 
+total
+getHighestIndex : Candidates (S n) -> (Fin (S n), VoteValue)
+getHighestIndex (x :: Nil) = (FZ, candValue x)
+getHighestIndex (x :: xs@(_ :: _))  = case getHighestIndex xs of
+    (highestIndex, highestVal) => 
+        if highestVal > candValue x
+            then
+                (FS highestIndex, highestVal)
+            else
+                (FZ, candValue x)
+
+total
+getLowestIndex : Candidates (S n) -> (Fin (S n), VoteValue)
+getLowestIndex (x :: Nil) = (FZ, candValue x)
+getLowestIndex (x :: xs@(_ :: _))  = case getLowestIndex xs of
+    (lowestIndex, lowestVal) => 
+        if lowestVal < candValue x
+            then
+                (FS lowestIndex, lowestVal)
+            else
+                (FZ, candValue x)
+
 addVoteVal : Fin n -> Candidates n -> VoteValue -> Candidates n
 addVoteVal i cands newVal = replaceAt i newCand cands where
     oldCand : Candidate
@@ -61,6 +88,9 @@ decVoteVal i cands vv = addVoteVal i cands (-1 * vv)
 
 removeCand : Fin (S n) -> Candidates (S n) -> Candidates n
 removeCand = deleteAt
+
+elect : Candidate -> Judged
+elect cand = MkJudgment (candName cand) Elected
 
 dontElect : Candidate -> Judged
 dontElect cand = MkJudgment (candName cand) NotElected
