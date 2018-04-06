@@ -1,16 +1,21 @@
 module Candidates
 
 import Data.Vect
-import Ballot
 
 %access public export
+
+VoteValue : Type
+VoteValue = Double
 
 ExVect : Type -> Type
 ExVect t = (n ** Vect n t)
 
+CandidateName : Type
+CandidateName = String
+
 record Candidate where
     constructor MkCandidate
-    candName : Candidate
+    candName : CandidateName
     candValue : VoteValue
 
 Candidates : Nat -> Type
@@ -20,20 +25,33 @@ data Judgment = Elected | NotElected
 
 record Judged where
     constructor MkJudgment
-    candName : Candidate
+    candName : CandidateName
     judgment : Judgment
 
 Results : Nat -> Type
 Results n = Vect n Judged
 
-
 getCand : Fin n -> Candidates n -> Candidate
-getCand = candName index
+getCand = index
 
 getCandVal : Fin n -> Candidates n -> VoteValue
-getCandVal = candValue index
+getCandVal i cands = candValue $ getCand i cands
 
-addVoteVal : Fin n -> Candidates n -> VoteValue -> VoteValue
+getCandName : Fin n -> Candidates n -> CandidateName
+getCandName i cands = candName $ getCand i cands
+
+addVoteVal : Fin n -> Candidates n -> VoteValue -> Candidates n
+addVoteVal i cands newVal = replaceAt i newCand cands where
+    oldCand : Candidate
+    oldCand = index i cands
+    newVoteVal : VoteValue
+    newVoteVal = newVal + candValue oldCand
+    newCand : Candidate
+    newCand = record { candValue = newVoteVal } oldCand
+
+decVoteVal : Fin n -> Candidates n -> VoteValue -> Candidates n
+decVoteVal i cands vv = addVoteVal i cands (-1 * vv)
+
 
 removeCand : Fin (S n) -> Candidates (S n) -> Candidates n
 removeCand = deleteAt

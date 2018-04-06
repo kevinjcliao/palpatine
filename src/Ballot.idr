@@ -5,9 +5,6 @@ import Data.Fin
 
 %access public export
 
-VoteValue : Type
-VoteValue = Double
-
 -- New ballot type has a list of fins and
 -- a double as a pair. 
 total
