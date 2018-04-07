@@ -10,78 +10,17 @@ import Data.SortedMap
 
 ||| Calculates the Droop Quota, as defined by the Australian Electoral Commission
 ||| http://www.aec.gov.au/Voting/counting/senate_count.htm
--- total
--- droopQuota : Int -> Int -> Int
--- droopQuota intBallots intSeats = 
---     flooredFirstDiv + 1
---     where
---         numBallots : Double
---         numBallots = cast intBallots
---         numSeats : Double
---         numSeats = cast intSeats
---         flooredFirstDiv : Int
---         flooredFirstDiv = cast $ numBallots / (numSeats + 1)
-
--- ||| firstCount runs through the ballots for the first time. It then
--- ||| inserts the value into the VoteCount SortedMap. 
--- ||| addVote : Fin n -> Candidates n -> VoteValue -> VoteCount -> VoteCount
--- total
--- firstCount : Candidates n -> List (Ballot n) -> VoteCount -> VoteCount
--- firstCount cands [] vc = vc
--- firstCount cands (bal :: rest) vc = 
---     firstCount cands rest newVc where
---     newVc : VoteCount
---     newVc = case bal of
---         ((cand :: _), val) => addVote cand cands val vc
---         ([], _)            => vc
-
-
-
-
--- ||| isEwin checks to make sure that the number of elected candidates is the
--- ||| same as the number of seats available. What happens when there are less
--- ||| candidates than there are seats available? 
--- isEwin : (n : Nat) -> (electedCands : Candidates x) -> Bool
--- -- Case 1: Less seats than there are candidates?? What do we do in this case...
--- isEwin Z (x :: xs)     = True
--- -- Case 2: Less candidates than there are seats available: False.
--- isEwin (S n) Nil       = False
--- -- Case 3: No seats left and same number of candidates: True.
--- isEwin Z Nil           = True
--- isEwin (S n) (x :: xs) = isEwin n xs
-
--- elimCandFromBallot : Fin n -> Ballot n -> Ballot n
--- elimCandFromBallot index b@(cands, v) = (filter (/= index) cands, v)
-
--- ||| Only should be called from eliminate. 
--- total
--- elimCandFromBallots : List $ Ballot n -> Fin n -> List $ Ballot n
--- elimCandFromBallots ballots index = map (elimCandFromBallot index) ballots
-
--- ||| Maps through the HashMap and chooses the least popular candidate
--- ||| to eliminate. Returns the new ballots with that candidate
--- ||| eliminated. NOTE: Does not eliminate the candidate from
--- ||| remaining. We do this to preserve the relationship where
--- ||| elected + remaining is always the same number. 
--- total 
--- eliminate : VoteCount 
---           -> Candidates (S n)
---           -> List $ Ballot (S n)
---           -> (Candidate, VoteCount, List $ Ballot $ S n)
--- eliminate {n} vc cands ballots = 
---     (lowestCand, newVc, newBallots) where
---     voteVals : Vect (S n) VoteValue
---     voteVals = candVoteVals cands vc
---     lowestCandIndex : Fin (S n)
---     lowestCandIndex = case getLowestIndex voteVals of
---         (_, i) => i
---     lowestCand : Candidate
---     lowestCand = case getLowestIndex voteVals of
---         (lowestVal, lowestIndex) => getCand lowestIndex cands
---     newVc : VoteCount
---     newVc = deleteCandidate lowestCand vc
---     newBallots : List $ Ballot (S n)
---     newBallots = elimCandFromBallots ballots lowestCandIndex
+total
+droopQuota : Int -> Int -> Int
+droopQuota intBallots intSeats = 
+    flooredFirstDiv + 1
+    where
+        numBallots : Double
+        numBallots = cast intBallots
+        numSeats : Double
+        numSeats = cast intSeats
+        flooredFirstDiv : Int
+        flooredFirstDiv = cast $ numBallots / (numSeats + 1)
 
 
 -- ||| revalueBallot takes a ballot and a new vote value and
@@ -111,28 +50,6 @@ import Data.SortedMap
 --         surplus = score - (cast dq)
 --         newVal : VoteValue
 --         newVal = surplus / score
-
--- total   
--- reindexPref : (former : Candidates (S n))
---             -> (new : Candidates n)
---             -> (prev : Fin (S n))
---             -> Maybe $ Fin n
--- reindexPref former new oldPref = findIndex (==candidate) new where
---     candidate : Candidate
---     candidate = index oldPref former
-
--- ||| Reindexes a ballot according to the new candidates after one
--- ||| has been elected or eliminated. 
--- total
--- redoBallot : (elected : Candidate)
---             -> (former : Candidates (S n))
---             -> (new : Candidates n)
---             -> (oldBallot : Ballot (S n))
---             -> Ballot n
--- redoBallot cand former new (oldPrefs, val) = 
---     ( mapMaybe (reindexPref former new) oldPrefs
---     , val
---     )
 
 
 -- ||| Maps through the ballots, selecting th
@@ -199,26 +116,61 @@ import Data.SortedMap
 --     newRemaining = case newStuff of
 --         (remaining, _, _, _) => remaining
 
+||| After a candidate was just eliminated from remaining, this iterates through
+||| the ballots and reindexes them according to the new candidate indices rather
+||| than the old one. 
+reindexBallots : Ballots (S r) -> Candidates (S r) -> Candidates r -> Ballots r
+reindexBallots {r} ballots oldCands newCands = 
+    map reindexBallot ballots where
+        reindexCand : Fin $ S r -> Maybe $ Fin r
+        reindexCand oldPref = findIndex (\x => candName x == cn) newCands where
+            cn : CandidateName
+            cn = candName $ index oldPref oldCands
+        reindexBallot : Ballot (S r) -> Ballot r
+        reindexBallot (prefs, voteval) = 
+            (mapMaybe reindexCand prefs, voteval)
+        
+
+count : Election r j -> Election r j
+count {r} election@(dq, seats, ballots, cands, results) = ?count where
+    countBallot : Ballot r -> Candidates r -> Candidates r
+    countBallot ballot cands = case nextCand ballot of
+        Just topPrefIndex => addVoteVal topPrefIndex cands $ ballotValue ballot
+        Nothing           => cands
+    countBallots : Ballots r -> Candidates r -> Candidates r
+    countBallots Nil cands       = cands
+    countBallots (x :: xs) cands = countBallots xs $ countBallot x cands
 
 -- electCandidates should map through the elected candidates and elect each one. 
 ||| You can use Typed Holes as error messages and that's really stupid! 
 total
 electOne : Election (S r) j -> Election r (S j)
-electOne = ?electOneHole
-
-||| TODO: Reindex ballots. 
-total
-elimOne : Election (S r) j -> Election r (S j)
-elimOne {r} {j} election@(dq, _, _, cands, results) = ?elimOneHole where
-    lowestCandIndex : Fin $ S r
-    lowestCandIndex = case getLowestIndex cands of
+electOne {r} {j} election@(dq, _, _, cands, results) = ?electOneHole where
+    highestCandIndex : Fin $ S r
+    highestCandIndex = case getHighestIndex cands of
         (i, _) => i
     result : Judged
-    result = dontElect $ getCand lowestCandIndex cands
+    result = elect $ getCand highestCandIndex cands
     newResults : Results (S j)
     newResults = (result :: results)
     newCands : Candidates r
-    newCands = removeCand lowestCandIndex cands
+    newCands = removeCand highestCandIndex cands
+
+total
+elimOne : Election (S r) j -> Election r (S j)
+elimOne {r} {j} election@(dq, seats, ballots, cands, results) = 
+    (dq, seats, newBallots, newCands, newResults) where
+        lowestCandIndex : Fin $ S r
+        lowestCandIndex = case getLowestIndex cands of
+            (i, _) => i
+        result : Judged
+        result = dontElect $ getCand lowestCandIndex cands
+        newResults : Results (S j)
+        newResults = (result :: results)
+        newCands : Candidates r
+        newCands = removeCand lowestCandIndex cands
+        newBallots : Ballots r
+        newBallots = reindexBallots ballots cands newCands
 
 weCanElect : Int -> Candidates (S n) -> Bool
 weCanElect dq cands = maxCandValue > (cast dq) where
@@ -230,6 +182,7 @@ notElectedHead : Election (S r) j -> Election r (S j)
 notElectedHead election@(dq, seats, ballots, (x :: xs), results) = 
     makeElection dq seats ?ballots xs ((dontElect x) :: results)
 
+total
 processOne : Election (S r) j -> Election r (S j)
 processOne election@(_, Z, _, _, _)          = notElectedHead election
 processOne election@(dq, (S n), _, cands, _) = 
