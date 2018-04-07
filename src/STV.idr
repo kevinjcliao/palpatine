@@ -21,7 +21,13 @@ droopQuota intBallots intSeats =
         numSeats = cast intSeats
         flooredFirstDiv : Int
         flooredFirstDiv = cast $ numBallots / (numSeats + 1)
-        
+
+total
+transferValue : Int -> Int -> VoteValue
+transferValue dq votes = surplus / (cast votes) where
+    surplus : Double
+    surplus = cast votes - cast dq
+
 -- ||| revalueBallot takes a ballot and a new vote value and
 -- ||| creates a new one. 
 -- revalueBallot : (value : VoteValue)
