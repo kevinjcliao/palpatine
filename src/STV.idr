@@ -84,17 +84,6 @@ import Data.SortedMap
 --     newBallots = elimCandFromBallots ballots lowestCandIndex
 
 
--- ||| Returns the highest candidate. 
--- highestCandIndex : VoteCount 
---                 -> Candidates (S n)
---                 -> List $ Ballot (S n)
---                 -> (Fin $ S n, VoteValue)
--- highestCandIndex {n} vc cands ballots = highestCand where
---     voteVals : Vect (S n) VoteValue
---     voteVals = candVoteVals cands vc
---     highestCand : (Fin $ S n, VoteValue)
---     highestCand = getHighestIndex voteVals
-
 -- ||| revalueBallot takes a ballot and a new vote value and
 -- ||| creates a new one. 
 -- revalueBallot : (value : VoteValue)
@@ -217,9 +206,19 @@ total
 electOne : Election (S r) j -> Election r (S j)
 electOne = ?electOneHole
 
+||| TODO: Reindex ballots. 
 total
 elimOne : Election (S r) j -> Election r (S j)
-elimOne = ?elimOneHole
+elimOne {r} {j} election@(dq, _, _, cands, results) = ?elimOneHole where
+    lowestCandIndex : Fin $ S r
+    lowestCandIndex = case getLowestIndex cands of
+        (i, _) => i
+    result : Judged
+    result = dontElect $ getCand lowestCandIndex cands
+    newResults : Results (S j)
+    newResults = (result :: results)
+    newCands : Candidates r
+    newCands = removeCand lowestCandIndex cands
 
 weCanElect : Int -> Candidates (S n) -> Bool
 weCanElect dq cands = maxCandValue > (cast dq) where
