@@ -50,17 +50,6 @@ import Data.SortedMap
 -- isEwin Z Nil           = True
 -- isEwin (S n) (x :: xs) = isEwin n xs
 
--- total
--- getLowestIndex : Vect (S n) VoteValue -> (VoteValue, Fin (S n))
--- getLowestIndex (x :: Nil) = (x, FZ)
--- getLowestIndex (x :: xs@(_ :: _))  = case getLowestIndex xs of
---     (lowestVal, lowestIndex) => 
---         if lowestVal < x
---             then
---                 (lowestVal, FS lowestIndex)
---             else
---                 (x, FZ)
-
 -- elimCandFromBallot : Fin n -> Ballot n -> Ballot n
 -- elimCandFromBallot index b@(cands, v) = (filter (/= index) cands, v)
 
@@ -232,8 +221,11 @@ total
 elimOne : Election (S r) j -> Election r (S j)
 elimOne = ?elimOneHole
 
-weCanElect : Int -> Candidates n -> Bool
-weCanElect = ?canElect
+weCanElect : Int -> Candidates (S n) -> Bool
+weCanElect dq cands = maxCandValue > (cast dq) where
+    maxCandValue : VoteValue
+    maxCandValue = case getHighestIndex cands of
+        (_, vv) => vv
 
 notElectedHead : Election (S r) j -> Election r (S j)
 notElectedHead election@(dq, seats, ballots, (x :: xs), results) = 
