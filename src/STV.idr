@@ -21,37 +21,7 @@ droopQuota intBallots intSeats =
         numSeats = cast intSeats
         flooredFirstDiv : Int
         flooredFirstDiv = cast $ numBallots / (numSeats + 1)
-<<<<<<< HEAD
-=======
-
-
--- ||| Maps through the HashMap and chooses the least popular candidate
--- ||| to eliminate. Returns the new ballots with that candidate
--- ||| eliminated. NOTE: Does not eliminate the candidate from
--- ||| remaining. We do this to preserve the relationship where
--- ||| elected + remaining is always the same number. 
--- total 
--- eliminate : VoteCount 
---           -> Candidates (S n)
---           -> List $ Ballot (S n)
---           -> (Candidate, VoteCount, List $ Ballot $ S n)
--- eliminate {n} vc cands ballots = 
---     (lowestCand, newVc, newBallots) where
---     voteVals : Vect (S n) VoteValue
---     voteVals = candVoteVals cands vc
---     lowestCandIndex : Fin (S n)
---     lowestCandIndex = case getLowestIndex voteVals of
---         (_, i) => i
---     lowestCand : Candidate
---     lowestCand = case getLowestIndex voteVals of
---         (lowestVal, lowestIndex) => getCand lowestIndex cands
---     newVc : VoteCount
---     newVc = deleteCandidate lowestCand vc
---     newBallots : List $ Ballot (S n)
---     newBallots = elimCandFromBallots ballots lowestCandIndex
->>>>>>> 88c916ba08e70b46141d37b8efb63cd3bc3b3845
-
-
+        
 -- ||| revalueBallot takes a ballot and a new vote value and
 -- ||| creates a new one. 
 -- revalueBallot : (value : VoteValue)
@@ -145,12 +115,9 @@ droopQuota intBallots intSeats =
 --     newRemaining = case newStuff of
 --         (remaining, _, _, _) => remaining
 
-<<<<<<< HEAD
 ||| After a candidate was just eliminated from remaining, this iterates through
 ||| the ballots and reindexes them according to the new candidate indices rather
 ||| than the old one. 
-=======
->>>>>>> 88c916ba08e70b46141d37b8efb63cd3bc3b3845
 reindexBallots : Ballots (S r) -> Candidates (S r) -> Candidates r -> Ballots r
 reindexBallots {r} ballots oldCands newCands = 
     map reindexBallot ballots where
@@ -188,10 +155,6 @@ electOne {r} {j} election@(dq, _, _, cands, results) = ?electOneHole where
     newCands : Candidates r
     newCands = removeCand highestCandIndex cands
 
-<<<<<<< HEAD
-=======
-||| TODO: Reindex ballots. 
->>>>>>> 88c916ba08e70b46141d37b8efb63cd3bc3b3845
 total
 elimOne : Election (S r) j -> Election r (S j)
 elimOne {r} {j} election@(dq, seats, ballots, cands, results) = 
