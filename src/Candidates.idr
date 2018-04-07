@@ -89,6 +89,9 @@ decVoteVal i cands vv = addVoteVal i cands (-1 * vv)
 removeCand : Fin (S n) -> Candidates (S n) -> Candidates n
 removeCand = deleteAt
 
+makeNewCandidate : CandidateName -> Candidate
+makeNewCandidate name = MkCandidate name 0
+
 elect : Candidate -> Judged
 elect cand = MkJudgment (candName cand) Elected
 
