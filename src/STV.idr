@@ -23,103 +23,10 @@ droopQuota intBallots intSeats =
         flooredFirstDiv = cast $ numBallots / (numSeats + 1)
 
 total
-transferValue : Int -> Int -> VoteValue
-transferValue dq votes = surplus / (cast votes) where
-    surplus : Double
-    surplus = cast votes - cast dq
-
--- ||| revalueBallot takes a ballot and a new vote value and
--- ||| creates a new one. 
--- revalueBallot : (value : VoteValue)
---               -> (cand : Candidate)
---               -> (cands : Candidates n)
---               -> (ballot : Ballot n)
---               -> Ballot n
--- revalueBallot val cand cands bal@(Nil, _)      = bal
--- revalueBallot val cand cands bal@((x :: _), _) = 
---     if (index x cands) == cand
---         then newBallotVal bal val
---         else bal
-
--- ||| Revalues the ballots that were responsible for electing
--- ||| the candidate that was just elected. 
--- revalue : (elected : Candidate)
---         -> (droopQuota : Int)
---         -> (candScore : VoteValue)
---         -> (cands : Candidates n)
---         -> (oldBallots : List $ Ballot n)
---         -> List $ Ballot n
--- revalue cand dq score cands ballots = 
---     map (revalueBallot newVal cand cands) ballots where
---         surplus : VoteValue
---         surplus = score - (cast dq)
---         newVal : VoteValue
---         newVal = surplus / score
-
-
--- ||| Maps through the ballots, selecting th
--- total
--- redoBallots : (elected : Candidate)
---             -> (former : Candidates (S n))
---             -> (new : Candidates n)
---             -> (oldBallots : List $ Ballot (S n))
---             -> List $ Ballot n
--- redoBallots elected former new oldBallots = 
---     map (redoBallot elected former new) oldBallots
-
--- -- TODO: Transfer the surplus!!! 
--- electCandidate : (remaining : Candidates (S n))
---                -> (elected : Candidates p)
---                -> (candIndex : Fin (S n))
---                -> (candValue : VoteValue)
---                -> List (Ballot (S n)) 
---                -> VoteCount
---                -> (dq : Int)
---                -> (Candidates n, Candidates (S p), List (Ballot n), VoteCount)
--- electCandidate {n} {p} remaining elected cand vv ballots vc dq = 
---     (newCands, electedCands, newBallots, newVc) where
---         electedCand : Candidate
---         electedCand = index cand remaining
---         newCands : Candidates n
---         newCands = removeCand cand remaining
---         ballotsWithNewValue : List $ Ballot $ S n
---         ballotsWithNewValue = revalue electedCand dq vv remaining ballots
---         removeBallotHead : Ballot r -> Ballot r
---         removeBallotHead b@([], v)     = ([], v)
---         removeBallotHead b@(x :: xs, v) = (xs, v)
---         ballotsWithoutHead : List $ Ballot $ S n
---         ballotsWithoutHead = map removeBallotHead ballotsWithNewValue
---         newBallots : List (Ballot n)
---         newBallots = redoBallots electedCand remaining newCands ballotsWithoutHead
---         electedCands : Candidates (S p)
---         electedCands = (electedCand :: elected)
---         newVc : VoteCount
---         newVc = deleteCandidate electedCand vc
-
--- canElect : VoteCount -> Candidates (S n) -> Maybe $ Fin (S n)
--- canElect = ?canElect
-
--- electHighestCand : (cands : Candidates (S n))
---                  -> (elected : Candidates e)
---                  -> (ballots : List $ Ballot (S n))
---                  -> (vc : VoteCount)
---                  -> (dq : Int)
---                  -> (Candidates (S e), Candidates n)
--- electHighestCand {n} {e} cands elected ballots vc dq = (newElected, newRemaining) where
---     toElect : (Fin $ S n, VoteValue)
---     toElect = highestCandIndex vc cands ballots
---     toElectIndex : Fin $ S n
---     toElectIndex = case toElect of (i, _) => i
---     toElectValue : VoteValue
---     toElectValue = case toElect of (_, v) => v
---     newStuff : (Candidates n, Candidates (S e), List (Ballot n), VoteCount)
---     newStuff = electCandidate cands elected toElectIndex toElectValue ballots vc dq
---     newElected : Candidates (S e)
---     newElected = case newStuff of
---         (_, elected, _, _) => elected
---     newRemaining : Candidates n
---     newRemaining = case newStuff of
---         (remaining, _, _, _) => remaining
+transferValue : Int -> VoteValue -> VoteValue
+transferValue dq votes = surplus / votes where
+    surplus : VoteValue
+    surplus = votes - cast dq
 
 ||| After a candidate was just eliminated from remaining, this iterates through
 ||| the ballots and reindexes them according to the new candidate indices rather
@@ -150,16 +57,26 @@ count {r} election@(dq, seats, ballots, cands, results) = ?count where
 ||| You can use Typed Holes as error messages and that's really stupid! 
 total
 electOne : Election (S r) j -> Election r (S j)
-electOne {r} {j} election@(dq, _, _, cands, results) = ?electOneHole where
-    highestCandIndex : Fin $ S r
-    highestCandIndex = case getHighestIndex cands of
-        (i, _) => i
-    result : Judged
-    result = elect $ getCand highestCandIndex cands
-    newResults : Results (S j)
-    newResults = (result :: results)
-    newCands : Candidates r
-    newCands = removeCand highestCandIndex cands
+electOne {r} {j} election@(dq, seats, ballots, cands, results) = 
+    (dq, seats, newBallots, newCands, newResults) where
+        highestCandIndex : Fin $ S r
+        highestCandIndex = case getHighestIndex cands of
+            (i, _) => i
+        highestCandValue : VoteValue
+        highestCandValue = candValue $ index highestCandIndex cands
+        result : Judged
+        result = elect $ getCand highestCandIndex cands
+        newResults : Results (S j)
+        newResults = (result :: results)
+        newCands : Candidates r
+        newCands = removeCand highestCandIndex cands
+        newBallotVal : VoteValue
+        newBallotVal = transferValue dq highestCandValue
+        ballotsWithNewValueAndRest : Ballots (S r)
+        ballotsWithNewValueAndRest = 
+            map (changeBallotIfIsCand highestCandIndex newBallotVal) ballots
+        newBallots : Ballots r
+        newBallots = reindexBallots ballotsWithNewValueAndRest cands newCands
 
 total
 elimOne : Election (S r) j -> Election r (S j)
