@@ -6,6 +6,7 @@ import STV
 import Ballot
 import Data.Vect
 import Data.SortedMap
+import Election
 
 
 -- Sample ballots: 
@@ -37,6 +38,11 @@ ballot5 = ([2,1,0], 1)
 sampleBallots : List $ Ballot 3
 sampleBallots = [ballot1, ballot2, ballot3, ballot4, ballot5]
 
+-- Set this to the number of candidates being elected.
+-- TODO: This should be parsed from the file. 
+seats : Nat
+seats = 2
+
 total
 main : IO ()
 main = do
@@ -44,10 +50,22 @@ main = do
     --     | Left err => printLn err
     -- -- Parsing is broken so we'll simulate parsing working
     -- -- for now. 
-    -- let cands = sampleCandidates
-    -- let ballots = sampleBallots
-    -- let initialCount = initVoteCount cands
-    -- let count1 = firstCount cands ballots initialCount
-    -- let dq = droopQuota 5 seats
+    let cands = sampleCandidates
+    let ballots = sampleBallots
+    let dq = droopQuota 5 (cast seats)
+    let election = makeElection 
+        dq
+        seats
+        ballots
+        cands
+        emptyResults
+    printLn $ "first: " ++ (show cands)
+    let count1 = processOne election
+    printLn $ getRemaining count1
+    let count2 = processOne count1
+    printLn $ getRemaining count2
+    let count3 = processOne count2
+    printLn $ getRemaining count3
     -- printLn $ getElectedCands cands count1 dq
-    printLn "Nothing works at the moment."
+    case count3 of
+        e@(_,_,_,_,results) => printLn results

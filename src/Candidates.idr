@@ -25,6 +25,10 @@ implementation Ord Candidate where
     compare cand1 cand2 = 
         compare (candValue cand1) (candValue cand2)
 
+implementation Show Candidate where
+    show cand =
+        "(" ++ (candName cand) ++ ", " ++ (show $ candValue cand) ++ ")"
+
 Candidates : Nat -> Type
 Candidates n = Vect n Candidate
 
@@ -35,13 +39,24 @@ implementation Eq Judgment where
     (==) NotElected NotElected = True
     (==) _ _ = False
 
+implementation Show Judgment where
+    show Elected = "Elected"
+    show NotElected = "NotElected"
+
 record Judged where
     constructor MkJudgment
     candName : CandidateName
     judgment : Judgment
 
+implementation Show Judged where
+    show judged = 
+        "(" ++ (candName judged) ++ ", " ++ (show $ judgment judged) ++ ")"
+
 Results : Nat -> Type
 Results n = Vect n Judged
+
+emptyResults : Results Z
+emptyResults = Nil
 
 getCand : Fin n -> Candidates n -> Candidate
 getCand = index
@@ -102,11 +117,6 @@ dontElect cand = MkJudgment (candName cand) NotElected
 -- TODO: Parse this as a command line argument! 
 votes : String
 votes = "small_election.txt"
-
--- Set this to the number of candidates being elected.
--- TODO: This should be parsed from the file. 
-seats : Int
-seats = 2
 
 total
 getElectedCands : Results n -> (p ** Results p)

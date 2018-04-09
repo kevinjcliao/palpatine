@@ -37,5 +37,5 @@ changeBallotIfIsCand : Fin n -> VoteValue -> Ballot n -> Ballot n
 changeBallotIfIsCand cand vv ballot@(_, v) = case nextCand ballot of
     Just next => if cand == next 
         then restCand $ newBallotVal ballot vv 
-        else ballot
-    Nothing   => ballot
+        else restCand ballot
+    Nothing   => restCand ballot

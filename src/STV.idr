@@ -31,6 +31,7 @@ transferValue dq votes = surplus / votes where
 ||| After a candidate was just eliminated from remaining, this iterates through
 ||| the ballots and reindexes them according to the new candidate indices rather
 ||| than the old one. 
+total
 reindexBallots : Ballots (S r) -> Candidates (S r) -> Candidates r -> Ballots r
 reindexBallots {r} ballots oldCands newCands = 
     map reindexBallot ballots where
@@ -42,19 +43,26 @@ reindexBallots {r} ballots oldCands newCands =
         reindexBallot (prefs, voteval) = 
             (mapMaybe reindexCand prefs, voteval)
         
-
+||| Does a full count of the ballots by taking the top preference and the vote
+||| value and putting it into the candidates votes for the given candidate. 
+total
 count : Election r j -> Election r j
-count {r} election@(dq, seats, ballots, cands, results) = ?count where
-    countBallot : Ballot r -> Candidates r -> Candidates r
-    countBallot ballot cands = case nextCand ballot of
-        Just topPrefIndex => addVoteVal topPrefIndex cands $ ballotValue ballot
-        Nothing           => cands
-    countBallots : Ballots r -> Candidates r -> Candidates r
-    countBallots Nil cands       = cands
-    countBallots (x :: xs) cands = countBallots xs $ countBallot x cands
+count {r} election@(dq, seats, ballots, cands, results) = 
+    updateRemaining newCands election where
+        countBallot : Ballot r -> Candidates r -> Candidates r
+        countBallot ballot cands = case nextCand ballot of
+            Just topPrefIndex => 
+                addVoteVal topPrefIndex cands $ ballotValue ballot
+            Nothing           => cands
+        countBallots : Ballots r -> Candidates r -> Candidates r
+        countBallots Nil cands       = cands
+        countBallots (x :: xs) cands = countBallots xs $ countBallot x cands
+        newCands : Candidates r
+        newCands = countBallots ballots cands
 
--- electCandidates should map through the elected candidates and elect each one. 
-||| You can use Typed Holes as error messages and that's really stupid! 
+||| electOne elects a candidate. It takes in the highest candidate index and
+||| makes a judgment on that candidate as the new elected candidate. It then
+||| redistributes the preferences according to the new transfer value. 
 total
 electOne : Election (S r) j -> Election r (S j)
 electOne {r} {j} election@(dq, seats, ballots, cands, results) = 
@@ -72,12 +80,17 @@ electOne {r} {j} election@(dq, seats, ballots, cands, results) =
         newCands = removeCand highestCandIndex cands
         newBallotVal : VoteValue
         newBallotVal = transferValue dq highestCandValue
+        -- This creates ballots with newBallotVal (if they preferenced highest
+        -- cand first). It then removes the head of all the ballots. 
         ballotsWithNewValueAndRest : Ballots (S r)
         ballotsWithNewValueAndRest = 
             map (changeBallotIfIsCand highestCandIndex newBallotVal) ballots
         newBallots : Ballots r
         newBallots = reindexBallots ballotsWithNewValueAndRest cands newCands
 
+||| elimOne eliminates a candidate. It chooses the lowest valued candidate
+||| and then makes a judgment that the candidate is eliminated. It then
+||| reindexes the ballots without changing the vote value of the ballots. 
 total
 elimOne : Election (S r) j -> Election r (S j)
 elimOne {r} {j} election@(dq, seats, ballots, cands, results) = 
@@ -94,12 +107,14 @@ elimOne {r} {j} election@(dq, seats, ballots, cands, results) =
         newBallots : Ballots r
         newBallots = reindexBallots ballots cands newCands
 
+total
 weCanElect : Int -> Candidates (S n) -> Bool
 weCanElect dq cands = maxCandValue > (cast dq) where
     maxCandValue : VoteValue
     maxCandValue = case getHighestIndex cands of
         (_, vv) => vv
 
+total
 notElectedHead : Election (S r) j -> Election r (S j)
 notElectedHead election@(dq, seats, ballots, (x :: xs), results) = 
     makeElection dq seats ?ballots xs ((dontElect x) :: results)
@@ -107,13 +122,18 @@ notElectedHead election@(dq, seats, ballots, (x :: xs), results) =
 total
 processOne : Election (S r) j -> Election r (S j)
 processOne election@(_, Z, _, _, _)          = notElectedHead election
-processOne election@(dq, (S n), _, cands, _) = 
-    if weCanElect dq cands
+processOne election@(dq, (S n), _, _, _) = case count election of
+    counted@(_, _, _, cands, _) => if weCanElect dq cands
         then electOne election
         else elimOne election
 
--- ||| Running an STV election involves taking in the candidates, the seats, the
--- ||| ballots and producing a list of candidates to take the seats. 
--- ||| Returns a tuple of elected candidates and unelected candidates.
+
+||| Running an STV election involves taking in the candidates, the seats, the
+||| ballots and producing a list of candidates to take the seats. 
+||| Returns a tuple of elected candidates and unelected candidates.
+total
 stv : Election r Z -> Election Z r
-stv e@(_, _, _, Nil, _) = e
+stv e@(_, _, _, Nil, _)      = e
+stv e@(_, _, _, (_ :: _), _) = case processOne e of
+    next@(_, _, _, Nil, x) => next
+    next@(_, _, _, _, x)   => ?recursiveCall

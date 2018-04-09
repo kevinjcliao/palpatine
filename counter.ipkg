@@ -13,13 +13,10 @@ sourcedir  = src
 modules    = Test
             , STV
             , Candidates
-            , Parse
-            , VoteCount
+--            , Parse
+            , Election
 tests      = Test.spec
             , Test.testDroopQuota
-            , Test.testInitiateCount
-            , Test.testGetVoteForCandidate
-            , Test.testAddVote
 executable = counter
 main       = Main
 opts       = "-p contrib"
