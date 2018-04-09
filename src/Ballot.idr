@@ -5,18 +5,33 @@ import Data.Fin
 
 %access public export
 
+||| Convert a Fin to an Integer
+finToInt : Fin n -> Int
+finToInt FZ     = 0
+finToInt (FS k) = 1 + finToInt k
+
 -- New ballot type has a list of fins and
 -- a double as a pair. 
 total
 Ballot : Nat -> Type
 Ballot n = (List (Fin n), VoteValue)
 
+total
+getPrefs : Ballot n -> List $ Fin n
+getPrefs (prefs, _) = prefs
+
+total
+ballotValue : Ballot n -> VoteValue
+ballotValue (_, val) = val
+
+makeBallotShowable : Ballot n -> (List Int, VoteValue)
+makeBallotShowable (prefs, vv) = (map finToInt prefs, vv)
+
 Ballots : Nat -> Type
 Ballots n = List $ Ballot n
 
-total
-ballotValue : Ballot n -> Double
-ballotValue (_, val) = val
+makeBallotsShowable : Ballots n -> List $ (List Int, VoteValue)
+makeBallotsShowable = map makeBallotShowable
 
 total
 newBallotVal : Ballot n -> Double -> Ballot n

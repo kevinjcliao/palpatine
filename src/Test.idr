@@ -65,4 +65,13 @@ spec = assertEq 1 1
 testDroopQuota : IO ()
 testDroopQuota = assertEq (droopQuota 4376143 6) 625164
 
+testCount1 : Election 2 1
+testCount1 = processOne sampleElection
+
+testCount2 : Election 1 2
+testCount2 = processOne testCount1
+
+testCount3 : Election 0 3
+testCount3 = processOne testCount2
+
 

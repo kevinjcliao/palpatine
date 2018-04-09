@@ -124,8 +124,8 @@ processOne : Election (S r) j -> Election r (S j)
 processOne election@(_, Z, _, _, _)          = notElectedHead election
 processOne election@(dq, (S n), _, _, _) = case count election of
     counted@(_, _, _, cands, _) => if weCanElect dq cands
-        then electOne election
-        else elimOne election
+        then electOne counted
+        else elimOne counted
 
 
 ||| Running an STV election involves taking in the candidates, the seats, the

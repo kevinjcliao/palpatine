@@ -61,6 +61,7 @@ main = do
         emptyResults
     printLn $ "first: " ++ (show cands)
     let count1 = processOne election
+    printLn $ makeBallotsShowable $ getBallots count1
     printLn $ getRemaining count1
     let count2 = processOne count1
     printLn $ getRemaining count2
