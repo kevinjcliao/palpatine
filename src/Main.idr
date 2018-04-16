@@ -59,14 +59,15 @@ main = do
         ballots
         cands
         emptyResults
+    printLn $ "Droop Quota is: " ++ (show dq)
     printLn $ "first: " ++ (show cands)
     let count1 = processOne election
-    printLn $ makeBallotsShowable $ getBallots count1
+    printLn $ show $ makeBallotsShowable $ getBallots count1
     printLn $ getRemaining count1
     let count2 = processOne count1
     printLn $ getRemaining count2
     let count3 = processOne count2
     printLn $ getRemaining count3
     -- printLn $ getElectedCands cands count1 dq
-    case count3 of
+    case stv election of
         e@(_,_,_,_,results) => printLn results

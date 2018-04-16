@@ -127,13 +127,34 @@ processOne election@(dq, (S n), _, _, _) = case count election of
         then electOne counted
         else elimOne counted
 
+--         Type mismatch between
+--         Election 0 (n + S j) (Type of stv (processOne e))
+-- and
+--         (Int,
+--          Nat,
+--          List (List (Fin 0), Double),
+--          Vect 0 Candidate,
+--          Vect (S (plus n j)) Judged) (Expected type)
+
+-- Specifically:
+--         Type mismatch between
+--                 plus n (S j)
+--         and
+--                 S (plus n j)
+
+
+        -- total plusSuccRightSucc : (left : Nat) -> (right : Nat) ->
+        --     S (left + right) = left + (S right)
+        --   plusSuccRightSucc Z right        = Refl
+        --   plusSuccRightSucc (S left) right =
+        --     let inductiveHypothesis = plusSuccRightSucc left right in
+        --   rewrite inductiveHypothesis in Refl
 
 ||| Running an STV election involves taking in the candidates, the seats, the
 ||| ballots and producing a list of candidates to take the seats. 
 ||| Returns a tuple of elected candidates and unelected candidates.
 total
-stv : Election r Z -> Election Z r
-stv e@(_, _, _, Nil, _)      = e
-stv e@(_, _, _, (_ :: _), _) = case processOne e of
-    next@(_, _, _, Nil, x) => next
-    next@(_, _, _, _, x)   => ?recursiveCall
+stv : Election r j -> Election Z (r + j)
+stv         e@(_, _, _, Nil, _)      = e
+stv {r=(S n)} {j} e@(_, _, _, (_ :: _), _) = 
+    rewrite plusSuccRightSucc n j in stv $ processOne e

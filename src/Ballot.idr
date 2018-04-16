@@ -10,14 +10,32 @@ finToInt : Fin n -> Int
 finToInt FZ     = 0
 finToInt (FS k) = 1 + finToInt k
 
+Preferences : Nat -> Type
+Preferences n = List $ Fin n
+
+record Ballot2 (n : Nat) where
+    constructor MkBallot
+    elected : List CandidateName
+    prefs : Preferences n
+    value : VoteValue
+
+replacePrefs : Preferences n -> Ballot2 n -> Ballot2 n
+replacePrefs new ballot = record { prefs = new } ballot
+
+replaceValue : VoteValue -> Ballot2 n -> Ballot2 n
+replaceValue new ballot = record { value = new } ballot
+
+replaceElected : List CandidateName -> Ballot2 n -> Ballot2 n
+replaceElected new ballot = record { elected = new } ballot
+
 -- New ballot type has a list of fins and
 -- a double as a pair. 
 total
 Ballot : Nat -> Type
-Ballot n = (List (Fin n), VoteValue)
+Ballot n = (Preferences n, VoteValue)
 
 total
-getPrefs : Ballot n -> List $ Fin n
+getPrefs : Ballot n -> Preferences n
 getPrefs (prefs, _) = prefs
 
 total
