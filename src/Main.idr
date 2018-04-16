@@ -8,6 +8,7 @@ import Data.Vect
 import Data.List
 import Data.SortedMap
 import Election
+import Prelude.File
 
 
 sampleCandidates : Candidates 3
@@ -42,9 +43,7 @@ sampleBallots = [ballot1, ballot2, ballot3, ballot4, ballot5]
 total
 runElection : String -> IO ()
 runElection fileName = do
-    Right file <- openFile fileName Read
-    | Left err => printLn "ERROR: openFile failed."
-    Right str <- fread file
+    Right str <- readFile fileName
     | Left err => printLn "ERROR: ReadFile Failed."
     printLn "Printing file."
     let lines = split (=='\n') str
@@ -59,7 +58,7 @@ runElection fileName = do
             printLn $ "The Droop Quota is: " ++ (show dq)
             printLn "The Ballots are: "
             printLn $ show $ makeBallotsShowable ballots
-            case stv   
+            case stv
                 ( makeElection 
                   dq
                   seats
@@ -67,7 +66,9 @@ runElection fileName = do
                   cands
                   emptyResults
                 ) of
-                e@(_,_,_,_,results) => printLn results
+                e@(_,_,_,_,results) => do
+                    printLn "Done running the election. The results are:"
+                    printLn results
         Nothing => printLn "Parse error."
 
 partial
