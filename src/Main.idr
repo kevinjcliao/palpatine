@@ -60,9 +60,15 @@ main = do
         cands
         emptyResults
     printLn $ "Droop Quota is: " ++ (show dq)
-    printLn $ "first: " ++ (show cands)
+    printLn "Beginning initial count 0"
+    let count0 = count election
+    printLn "After the first count, the ballots are: "
+    printLn $ show $ makeBallotsShowable $ getBallots count0
+    printLn "The candidates are: "
+    printLn $ show $ getRemaining count0
     let count1 = processOne election
-    printLn $ show $ makeBallotsShowable $ getBallots count1
+    let ballot1 = show $ makeBallotsShowable $ getBallots count1
+    printLn $ "ballots after first election: " ++ ballot1
     printLn $ getRemaining count1
     let count2 = processOne count1
     printLn $ getRemaining count2

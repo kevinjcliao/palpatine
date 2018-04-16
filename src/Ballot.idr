@@ -2,6 +2,7 @@ module Ballot
 
 import Candidates
 import Data.Fin
+import Data.Vect
 
 %access public export
 
@@ -62,10 +63,19 @@ restCand ballot         = case getPrefs ballot of
     []          => ballot
     (_ :: rest) => replacePrefs rest ballot
 
+ballotDidElectCandidate : CandidateName -> Ballot n -> Bool
+ballotDidElectCandidate name ballot = elem name (votedFor ballot)
+
+addToVotedFor : Candidates n -> Ballot n -> Ballot n
+addToVotedFor cands ballot = case nextCand ballot of
+    Just topPrefIndex => let name = candName (index topPrefIndex cands) in 
+        record { 
+            votedFor = name :: (votedFor ballot) 
+        } (restCand ballot)
+    Nothing => ballot
+
 total
-changeBallotIfIsCand : Fin n -> VoteValue -> Ballot n -> Ballot n
-changeBallotIfIsCand cand vv ballot = case nextCand ballot of
-    Just next => if cand == next 
-        then restCand $ replaceValue vv ballot
-        else restCand ballot
-    Nothing   => restCand ballot
+changeBallotIfIsCand : CandidateName -> VoteValue -> Ballot n -> Ballot n
+changeBallotIfIsCand cand vv ballot = if ballotDidElectCandidate cand ballot
+    then replaceValue vv ballot
+    else ballot

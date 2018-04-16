@@ -51,7 +51,7 @@ reindexBallots {r} ballots oldCands newCands =
 total
 count : Election r j -> Election r j
 count {r} election@(dq, seats, ballots, cands, results) = 
-    updateRemaining newCands election where
+    makeElection dq seats newBallots newCands results where
         countBallot : Ballot r -> Candidates r -> Candidates r
         countBallot ballot cands = case nextCand ballot of
             Just topPrefIndex => 
@@ -60,6 +60,8 @@ count {r} election@(dq, seats, ballots, cands, results) =
         countBallots : Ballots r -> Candidates r -> Candidates r
         countBallots Nil cands       = cands
         countBallots (x :: xs) cands = countBallots xs $ countBallot x cands
+        newBallots : Ballots r
+        newBallots = map (addToVotedFor cands) ballots
         newCands : Candidates r
         newCands = countBallots ballots cands
 
@@ -73,6 +75,8 @@ electOne {r} {j} election@(dq, seats, ballots, cands, results) =
         highestCandIndex : Fin $ S r
         highestCandIndex = case getHighestIndex cands of
             (i, _) => i
+        highestCand : CandidateName
+        highestCand = candName $ index highestCandIndex cands
         highestCandValue : VoteValue
         highestCandValue = candValue $ index highestCandIndex cands
         result : Judged
@@ -84,12 +88,12 @@ electOne {r} {j} election@(dq, seats, ballots, cands, results) =
         newBallotVal : VoteValue
         newBallotVal = transferValue dq highestCandValue
         -- This creates ballots with newBallotVal (if they preferenced highest
-        -- cand first). It then removes the head of all the ballots. 
-        ballotsWithNewValueAndRest : Ballots (S r)
-        ballotsWithNewValueAndRest = 
-            map (changeBallotIfIsCand highestCandIndex newBallotVal) ballots
+        -- cand first). 
+        ballotsWithNewValue : Ballots (S r)
+        ballotsWithNewValue = 
+            map (changeBallotIfIsCand highestCand newBallotVal) ballots
         newBallots : Ballots r
-        newBallots = reindexBallots ballotsWithNewValueAndRest cands newCands
+        newBallots = reindexBallots ballotsWithNewValue cands newCands
 
 ||| elimOne eliminates a candidate. It chooses the lowest valued candidate
 ||| and then makes a judgment that the candidate is eliminated. It then
