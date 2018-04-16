@@ -12,7 +12,7 @@ Election r j = (Int, Nat, Ballots r, Candidates r, Results j)
 
 makeElection : Int 
             -> Nat 
-            -> Ballots r 
+            -> Ballots r
             -> Candidates r 
             -> Results j 
             -> Election r j

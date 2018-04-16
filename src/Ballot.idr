@@ -13,62 +13,59 @@ finToInt (FS k) = 1 + finToInt k
 Preferences : Nat -> Type
 Preferences n = List $ Fin n
 
-record Ballot2 (n : Nat) where
+record Ballot (n : Nat) where
     constructor MkBallot
     elected : List CandidateName
     prefs : Preferences n
     value : VoteValue
 
-replacePrefs : Preferences n -> Ballot2 n -> Ballot2 n
+replacePrefs : Preferences n -> Ballot n -> Ballot n
 replacePrefs new ballot = record { prefs = new } ballot
 
-replaceValue : VoteValue -> Ballot2 n -> Ballot2 n
+replaceValue : VoteValue -> Ballot n -> Ballot n
 replaceValue new ballot = record { value = new } ballot
 
-replaceElected : List CandidateName -> Ballot2 n -> Ballot2 n
+replaceElected : List CandidateName -> Ballot n -> Ballot n
 replaceElected new ballot = record { elected = new } ballot
-
--- New ballot type has a list of fins and
--- a double as a pair. 
-total
-Ballot : Nat -> Type
-Ballot n = (Preferences n, VoteValue)
 
 total
 getPrefs : Ballot n -> Preferences n
-getPrefs (prefs, _) = prefs
+getPrefs = prefs
 
 total
 ballotValue : Ballot n -> VoteValue
-ballotValue (_, val) = val
+ballotValue = value
 
-makeBallotShowable : Ballot n -> (List Int, VoteValue)
-makeBallotShowable (prefs, vv) = (map finToInt prefs, vv)
+makeBallotShowable : Ballot n -> (List CandidateName, List Int, VoteValue)
+makeBallotShowable ballot = 
+    ( elected ballot
+    , map finToInt (prefs ballot)
+    , value ballot
+    )
 
 Ballots : Nat -> Type
 Ballots n = List $ Ballot n
 
-makeBallotsShowable : Ballots n -> List $ (List Int, VoteValue)
+makeBallotsShowable : Ballots n 
+                    -> List $ (List CandidateName, List Int, VoteValue)
 makeBallotsShowable = map makeBallotShowable
 
 total
-newBallotVal : Ballot n -> Double -> Ballot n
-newBallotVal (prefs, _) newVal = (prefs, newVal)
-
-total
 nextCand : Ballot n -> Maybe $ Fin n
-nextCand ([], _)          = Nothing
-nextCand ((cand :: _), _) = Just cand
+nextCand ballot         = case getPrefs ballot of
+    [] => Nothing
+    (cand :: _) => Just cand
 
 total
 restCand : Ballot n -> Ballot n
-restCand ([], v)          = ([], v)
-restCand ((_ :: rest), v) = (rest, v)
+restCand ballot         = case getPrefs ballot of
+    []          => ballot
+    (_ :: rest) => replacePrefs rest ballot
 
 total
 changeBallotIfIsCand : Fin n -> VoteValue -> Ballot n -> Ballot n
-changeBallotIfIsCand cand vv ballot@(_, v) = case nextCand ballot of
+changeBallotIfIsCand cand vv ballot = case nextCand ballot of
     Just next => if cand == next 
-        then restCand $ newBallotVal ballot vv 
+        then restCand $ replaceValue vv ballot
         else restCand ballot
     Nothing   => restCand ballot

@@ -40,8 +40,11 @@ reindexBallots {r} ballots oldCands newCands =
             cn : CandidateName
             cn = candName $ index oldPref oldCands
         reindexBallot : Ballot (S r) -> Ballot r
-        reindexBallot (prefs, voteval) = 
-            (mapMaybe reindexCand prefs, voteval)
+        reindexBallot ballot = newBallot where
+            newPrefs : Preferences r
+            newPrefs = mapMaybe reindexCand $ getPrefs ballot
+            newBallot : Ballot r
+            newBallot = MkBallot (elected ballot) newPrefs (value ballot)
         
 ||| Does a full count of the ballots by taking the top preference and the vote
 ||| value and putting it into the candidates votes for the given candidate. 
