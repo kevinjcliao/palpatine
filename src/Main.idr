@@ -9,10 +9,6 @@ import Data.SortedMap
 import Election
 
 
--- Sample ballots: 
--- These ballots are what it would look like if parsing
--- for the small_election.txt succeeded. We will run an election on
--- this small data set. 
 sampleCandidates : Candidates 3
 sampleCandidates = 
     [ MkCandidate "A" 0
@@ -43,11 +39,10 @@ sampleBallots = [ballot1, ballot2, ballot3, ballot4, ballot5]
 seats : Nat
 seats = 2
 
-total
-main : IO ()
-main = do
-    Right file <- readFile votes
-        | Left err => printLn err
+runElection : String -> IO ()
+runElection fileName = do
+    Right file <- readFile fileName
+    | Left err => printLn err
     case readFirstLine file of
         Just ((p ** cands), seats) => let ballots = readBallots file cands in
             case stv   
@@ -60,7 +55,17 @@ main = do
                 ) of
             e@(_,_,_,_,results) => printLn results
         Nothing => printLn "Parse error."
-    -- let cands = sampleCandidates
+
+partial
+main : IO ()
+main = do
+    args <- getArgs
+    case args of
+        [_, fileName] => runElection fileName
+        _ => do 
+            printLn "ERROR: File name not given. Running default small_election"
+            runElection "small_election.txt"
+            -- let cands = sampleCandidates
     -- let ballots = sampleBallots
     -- let dq = droopQuota 5 (cast seats)
     -- let election = makeElection 
