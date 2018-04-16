@@ -44,7 +44,7 @@ reindexBallots {r} ballots oldCands newCands =
             newPrefs : Preferences r
             newPrefs = mapMaybe reindexCand $ getPrefs ballot
             newBallot : Ballot r
-            newBallot = MkBallot (elected ballot) newPrefs (value ballot)
+            newBallot = MkBallot (votedFor ballot) newPrefs (value ballot)
         
 ||| Does a full count of the ballots by taking the top preference and the vote
 ||| value and putting it into the candidates votes for the given candidate. 
@@ -129,29 +129,6 @@ processOne election@(dq, (S n), _, _, _) = case count election of
     counted@(_, _, _, cands, _) => if weCanElect dq cands
         then electOne counted
         else elimOne counted
-
---         Type mismatch between
---         Election 0 (n + S j) (Type of stv (processOne e))
--- and
---         (Int,
---          Nat,
---          List (List (Fin 0), Double),
---          Vect 0 Candidate,
---          Vect (S (plus n j)) Judged) (Expected type)
-
--- Specifically:
---         Type mismatch between
---                 plus n (S j)
---         and
---                 S (plus n j)
-
-
-        -- total plusSuccRightSucc : (left : Nat) -> (right : Nat) ->
-        --     S (left + right) = left + (S right)
-        --   plusSuccRightSucc Z right        = Refl
-        --   plusSuccRightSucc (S left) right =
-        --     let inductiveHypothesis = plusSuccRightSucc left right in
-        --   rewrite inductiveHypothesis in Refl
 
 ||| Running an STV election involves taking in the candidates, the seats, the
 ||| ballots and producing a list of candidates to take the seats. 

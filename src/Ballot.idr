@@ -15,7 +15,7 @@ Preferences n = List $ Fin n
 
 record Ballot (n : Nat) where
     constructor MkBallot
-    elected : List CandidateName
+    votedFor : List CandidateName
     prefs : Preferences n
     value : VoteValue
 
@@ -25,8 +25,8 @@ replacePrefs new ballot = record { prefs = new } ballot
 replaceValue : VoteValue -> Ballot n -> Ballot n
 replaceValue new ballot = record { value = new } ballot
 
-replaceElected : List CandidateName -> Ballot n -> Ballot n
-replaceElected new ballot = record { elected = new } ballot
+replaceVotedFor : List CandidateName -> Ballot n -> Ballot n
+replaceVotedFor new ballot = record { votedFor = new } ballot
 
 total
 getPrefs : Ballot n -> Preferences n
@@ -38,7 +38,7 @@ ballotValue = value
 
 makeBallotShowable : Ballot n -> (List CandidateName, List Int, VoteValue)
 makeBallotShowable ballot = 
-    ( elected ballot
+    ( votedFor ballot
     , map finToInt (prefs ballot)
     , value ballot
     )
