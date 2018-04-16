@@ -124,7 +124,12 @@ weCanElect dq cands = maxCandValue > (cast dq) where
 total
 notElectedHead : Election (S r) j -> Election r (S j)
 notElectedHead election@(dq, seats, ballots, (x :: xs), results) = 
-    makeElection dq seats ?ballots xs ((dontElect x) :: results)
+    makeElection 
+        dq 
+        seats 
+        (reindexBallots ballots (x :: xs) xs)
+        xs
+        ((dontElect x) :: results)
 
 total
 processOne : Election (S r) j -> Election r (S j)
