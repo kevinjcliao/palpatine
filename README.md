@@ -17,7 +17,29 @@ You should have Idris installed. This is usually as easy as:
 Palpatine is set up as an [Idrin project](https://github.com/zjhmale/idringen). You should follow the steps on the [Idrin Github](https://github.com/zjhmale/idringen) to install Idrin. After which, you should be able to do: 
 ```
 idrin build
-idrin run
+idrin run <FILENAME>
 ```
+
+File format: 
+Palpatine parses files in the following format:
+```
+[comma-separated list of candidates]:seats
+[comma-separated candidate preferences]
+[comma-separated candidate preferences]
+etc. 
+```
+
+A sample small_election file is provided below for your reference. 
+
+```
+[A,B,C]:2
+[A,C]
+[A,B,C]
+[A,C,B]
+[B,A]
+[C,B,A]
+```
+
+This elects 2 candidates out of a pool 3 candidates, A B and C. 
 
 [palpatine]: https://vignette.wikia.nocookie.net/starwars/images/9/9a/Palp_trustme.jpg/revision/latest/scale-to-width-down/250?cb=20070114040526
