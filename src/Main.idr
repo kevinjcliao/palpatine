@@ -82,4 +82,4 @@ main = do
             printLn "Done running election."
         _ => do 
             printLn "ERROR: File name not given. Running default small_election"
-            runElection "ACTB1_CONVERTED.txt"
+            runElection "sample_data/small_election.txt"
