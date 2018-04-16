@@ -41,6 +41,7 @@ readFirstLine input = do
     seats <- parsePositive strNum
     pure $ ((toVec cands), cast seats)
 
+total
 parseBallot : Candidates x -> List CandidateName -> Ballot x
 parseBallot {x} cands strs = MkBallot [] prefs 1 where
     getCandAsFin : CandidateName -> Maybe $ Fin x

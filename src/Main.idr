@@ -5,6 +5,7 @@ import Parse
 import STV
 import Ballot
 import Data.Vect
+import Data.List
 import Data.SortedMap
 import Election
 
@@ -34,26 +35,39 @@ ballot5 = MkBallot [] [2,1,0] 1
 sampleBallots : List $ Ballot 3
 sampleBallots = [ballot1, ballot2, ballot3, ballot4, ballot5]
 
--- Set this to the number of candidates being elected.
--- TODO: This should be parsed from the file. 
-seats : Nat
-seats = 2
-
+-- -- Set this to the number of candidates being elected.
+-- -- TODO: This should be parsed from the file. 
+-- seats : Nat
+-- seats = 2
+total
 runElection : String -> IO ()
 runElection fileName = do
-    Right file <- readFile fileName
-    | Left err => printLn err
-    case readFirstLine file of
-        Just ((p ** cands), seats) => let ballots = readBallots file cands in
+    Right file <- openFile fileName Read
+    | Left err => printLn "ERROR: openFile failed."
+    Right str <- fread file
+    | Left err => printLn "ERROR: ReadFile Failed."
+    printLn "Printing file."
+    let lines = split (=='\n') str
+    printLn "Readfile succeeded."
+    case readFirstLine str of
+        Just ((p ** cands), seats) => do 
+            printLn "Beginning readBallots."
+            printLn $ "Electing: " ++ (show seats) ++ "seats."
+            let ballots = readBallots str cands
+            printLn "Readballots complete."
+            let dq = (droopQuota (length ballots) (cast seats))
+            printLn $ "The Droop Quota is: " ++ (show dq)
+            printLn "The Ballots are: "
+            printLn $ show $ makeBallotsShowable ballots
             case stv   
                 ( makeElection 
-                  (droopQuota (length ballots) (cast seats))
+                  dq
                   seats
                   ballots
                   cands
                   emptyResults
                 ) of
-            e@(_,_,_,_,results) => printLn results
+                e@(_,_,_,_,results) => printLn results
         Nothing => printLn "Parse error."
 
 partial
@@ -61,54 +75,10 @@ main : IO ()
 main = do
     args <- getArgs
     case args of
-        [_, fileName] => runElection fileName
+        [_, fileName] => do
+            printLn $ "Palpatine has been invoked on: " ++ fileName
+            runElection fileName
+            printLn "Done running election."
         _ => do 
             printLn "ERROR: File name not given. Running default small_election"
-            runElection "small_election.txt"
-            -- let cands = sampleCandidates
-    -- let ballots = sampleBallots
-    -- let dq = droopQuota 5 (cast seats)
-    -- let election = makeElection 
-    --     dq
-    --     seats
-    --     ballots
-    --     cands
-    --     emptyResults
-    -- printLn $ "Droop Quota is: " ++ (show dq)
-    -- printLn "Beginning initial count 0"
-    -- let count0 = count election
-    -- printLn "After the first count, the ballots are: "
-    -- printLn $ show $ makeBallotsShowable $ getBallots count0
-    -- printLn "The candidates are: "
-    -- printLn $ show $ getRemaining count0
-    -- let count1 = processOne election
-    -- printLn "========================"
-    -- printLn "FIRST PROCESS HAS BEEN RUN"
-    -- printLn "========================"
-    -- let ballot1 = show $ makeBallotsShowable $ getBallots count1
-    -- printLn $ "ballots after first election: " ++ ballot1
-    -- printLn "Remaining: "
-    -- printLn $ show $ getRemaining count1
-    -- printLn "Results: "
-    -- printLn $ show $ getResults count1
-    -- let count2 = processOne count1
-    -- printLn "========================="
-    -- printLn "SECOND PROCESS HAS BEEN RUN"
-    -- printLn "========================="
-    -- let ballot2 = show $ makeBallotsShowable $ getBallots count2
-    -- printLn $ "ballots after SECOND election: " ++ ballot2
-    -- printLn "Remaining: "
-    -- printLn $ show $ getRemaining count2
-    -- printLn "Results: "
-    -- printLn $ show $ getResults count2
-    -- let count3 = processOne count2
-    -- printLn "=========================="
-    -- printLn "THIRD PROCESS HAS BEEN RUN"
-    -- printLn "=========================="
-    -- let ballot3 = show $ makeBallotsShowable $ getBallots count3
-    -- printLn $ "ballots after THIRD election: " ++ ballot3
-    -- printLn "Remaining: "
-    -- printLn $ show $ getRemaining count3
-    -- printLn "Results: "
-    -- printLn $ show $ getResults count3
-    -- -- printLn $ getElectedCands cands count1 dq
+            runElection "ACTB1_CONVERTED.txt"
