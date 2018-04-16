@@ -1,7 +1,7 @@
 module Main
 
 import Candidates
--- import Parse
+import Parse
 import STV
 import Ballot
 import Data.Vect
@@ -46,34 +46,64 @@ seats = 2
 total
 main : IO ()
 main = do
-    -- Right file <- readFile votes
-    --     | Left err => printLn err
-    -- -- Parsing is broken so we'll simulate parsing working
-    -- -- for now. 
-    let cands = sampleCandidates
-    let ballots = sampleBallots
-    let dq = droopQuota 5 (cast seats)
-    let election = makeElection 
-        dq
-        seats
-        ballots
-        cands
-        emptyResults
-    printLn $ "Droop Quota is: " ++ (show dq)
-    printLn "Beginning initial count 0"
-    let count0 = count election
-    printLn "After the first count, the ballots are: "
-    printLn $ show $ makeBallotsShowable $ getBallots count0
-    printLn "The candidates are: "
-    printLn $ show $ getRemaining count0
-    let count1 = processOne election
-    let ballot1 = show $ makeBallotsShowable $ getBallots count1
-    printLn $ "ballots after first election: " ++ ballot1
-    printLn $ getRemaining count1
-    let count2 = processOne count1
-    printLn $ getRemaining count2
-    let count3 = processOne count2
-    printLn $ getRemaining count3
-    -- printLn $ getElectedCands cands count1 dq
-    case stv election of
-        e@(_,_,_,_,results) => printLn results
+    Right file <- readFile votes
+        | Left err => printLn err
+    case readFirstLine file of
+        Just ((p ** cands), seats) => let ballots = readBallots file cands in
+            case stv   
+                ( makeElection 
+                  (droopQuota (length ballots) (cast seats))
+                  seats
+                  ballots
+                  cands
+                  emptyResults
+                ) of
+            e@(_,_,_,_,results) => printLn results
+        Nothing => printLn "Parse error."
+    -- let cands = sampleCandidates
+    -- let ballots = sampleBallots
+    -- let dq = droopQuota 5 (cast seats)
+    -- let election = makeElection 
+    --     dq
+    --     seats
+    --     ballots
+    --     cands
+    --     emptyResults
+    -- printLn $ "Droop Quota is: " ++ (show dq)
+    -- printLn "Beginning initial count 0"
+    -- let count0 = count election
+    -- printLn "After the first count, the ballots are: "
+    -- printLn $ show $ makeBallotsShowable $ getBallots count0
+    -- printLn "The candidates are: "
+    -- printLn $ show $ getRemaining count0
+    -- let count1 = processOne election
+    -- printLn "========================"
+    -- printLn "FIRST PROCESS HAS BEEN RUN"
+    -- printLn "========================"
+    -- let ballot1 = show $ makeBallotsShowable $ getBallots count1
+    -- printLn $ "ballots after first election: " ++ ballot1
+    -- printLn "Remaining: "
+    -- printLn $ show $ getRemaining count1
+    -- printLn "Results: "
+    -- printLn $ show $ getResults count1
+    -- let count2 = processOne count1
+    -- printLn "========================="
+    -- printLn "SECOND PROCESS HAS BEEN RUN"
+    -- printLn "========================="
+    -- let ballot2 = show $ makeBallotsShowable $ getBallots count2
+    -- printLn $ "ballots after SECOND election: " ++ ballot2
+    -- printLn "Remaining: "
+    -- printLn $ show $ getRemaining count2
+    -- printLn "Results: "
+    -- printLn $ show $ getResults count2
+    -- let count3 = processOne count2
+    -- printLn "=========================="
+    -- printLn "THIRD PROCESS HAS BEEN RUN"
+    -- printLn "=========================="
+    -- let ballot3 = show $ makeBallotsShowable $ getBallots count3
+    -- printLn $ "ballots after THIRD election: " ++ ballot3
+    -- printLn "Remaining: "
+    -- printLn $ show $ getRemaining count3
+    -- printLn "Results: "
+    -- printLn $ show $ getResults count3
+    -- -- printLn $ getElectedCands cands count1 dq

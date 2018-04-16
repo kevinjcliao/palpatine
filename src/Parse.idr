@@ -4,6 +4,7 @@ import Candidates
 import Ballot
 import Data.Vect
 import Data.SortedMap
+import Data.String
 
 %access public export
 
@@ -17,8 +18,8 @@ parseList str = do
     pure pieces
 
 total
-splitToStringBallots : String -> List String
-splitToStringBallots = split (== '\n')
+splitToLines : String -> List String
+splitToLines = split (== '\n')
 
 -- toVec : List a -> (n ** Vect n a)
 toVec : List a -> ExVect a
@@ -28,35 +29,29 @@ toVec (x :: xs) = case toVec xs of
 
 ||| This is a use of dependent types. 
 total
-readFirstLine : List String -> Maybe $ ExVect Candidate
+readFirstLine : String -> Maybe (ExVect Candidate, Nat)
 readFirstLine input = do
-    firstLine <- head' input
-    let splitted = split (== ':') firstLine
+    let lines = splitToLines input
+    firstLine <- head' lines
+    let splitted =split (== ':') firstLine
     strCand <- head' splitted
     strNum <- last' splitted
     listCand <- parseList strCand
-    pure $ toVec listCand
+    let cands = map (\x => MkCandidate x 0) listCand
+    seats <- parsePositive strNum
+    pure $ ((toVec cands), cast seats)
 
-parseBallot : Candidates x -> List Candidate  -> Ballot x
-parseBallot {x} cands strs = (prefs, 1) where
-    getCandAsFin : Candidate -> Maybe $ Fin x
-    getCandAsFin cand = elemIndex cand cands
+parseBallot : Candidates x -> List CandidateName -> Ballot x
+parseBallot {x} cands strs = MkBallot [] prefs 1 where
+    getCandAsFin : CandidateName -> Maybe $ Fin x
+    getCandAsFin cand = findIndex (\x => candName x == cand) cands
     prefs : List $ Fin x
     prefs = mapMaybe getCandAsFin strs
 
 total
-readBallots : String -> (y ** Vect y Candidate) -> List $ Ballot y
-readBallots input (_ ** cands) = map (parseBallot cands) listOfPrefs where
+readBallots : String -> Candidates y -> Ballots y
+readBallots input cands = map (parseBallot cands) listOfPrefs where
     lines : List String
-    lines = drop 1 $ splitToStringBallots input
+    lines = drop 1 $ splitToLines input
     listOfPrefs : List $ List String
     listOfPrefs = mapMaybe parseList lines
-
-total
-getCandidates : String -> ExVect Candidate
-getCandidates input = do
-    let lines = splitToStringBallots input
-    let candidates = readFirstLine lines
-    case candidates of
-        Just exvec => exvec
-        Nothing    => (Z ** Nil)

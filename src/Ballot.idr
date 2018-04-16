@@ -47,6 +47,10 @@ makeBallotShowable ballot =
 Ballots : Nat -> Type
 Ballots n = List $ Ballot n
 
+length : Ballots n -> Int
+length Nil = 0
+length (x :: xs) = 1 + length xs
+
 makeBallotsShowable : Ballots n 
                     -> List $ (List CandidateName, List Int, VoteValue)
 makeBallotsShowable = map makeBallotShowable

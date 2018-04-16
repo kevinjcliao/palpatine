@@ -13,7 +13,7 @@ sourcedir  = src
 modules    = Test
             , STV
             , Candidates
---            , Parse
+            , Parse
             , Election
 tests      = Test.spec
             , Test.testDroopQuota
