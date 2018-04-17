@@ -44,20 +44,20 @@ total
 runElection : String -> IO ()
 runElection fileName = do
     Right str <- readFile fileName
-    | Left err => printLn "ERROR: ReadFile Failed."
-    printLn "Printing file."
+    | Left err => putStrLn "ERROR: ReadFile Failed."
+    putStrLn "Printing file."
     let lines = split (=='\n') str
-    printLn "Readfile succeeded."
+    putStrLn "Readfile succeeded."
     case readFirstLine str of
         Just ((p ** cands), seats) => do 
-            printLn "Beginning readBallots."
-            printLn $ "Electing: " ++ (show seats) ++ "seats."
+            putStrLn "Beginning readBallots."
+            putStrLn $ "Electing: " ++ (show seats) ++ "seats."
             let ballots = readBallots str cands
-            printLn "Readballots complete."
+            putStrLn "Readballots complete."
             let dq = (droopQuota (length ballots) (cast seats))
-            printLn $ "The Droop Quota is: " ++ (show dq)
-            printLn "The Ballots are: "
-            printLn $ show $ makeBallotsShowable ballots
+            putStrLn $ "The Droop Quota is: " ++ (show dq)
+            putStrLn "The Ballots are: "
+            putStrLn $ show $ makeBallotsShowable ballots
             case stv
                 ( makeElection 
                   dq
@@ -67,9 +67,9 @@ runElection fileName = do
                   emptyResults
                 ) of
                 e@(_,_,_,_,results) => do
-                    printLn "Done running the election. The results are:"
-                    printLn results
-        Nothing => printLn "Parse error."
+                    putStrLn "Done running the election. The results are:"
+                    putStrLn $ show results
+        Nothing => putStrLn "Parse error."
 
 partial
 main : IO ()
@@ -77,9 +77,9 @@ main = do
     args <- getArgs
     case args of
         [_, fileName] => do
-            printLn $ "Palpatine has been invoked on: " ++ fileName
+            putStrLn $ "Palpatine has been invoked on: " ++ fileName
             runElection fileName
-            printLn "Done running election."
+            putStrLn "Done running election."
         _ => do 
-            printLn "ERROR: File name not given. Running default small_election"
+            putStrLn "ERROR: File name not given. Running default small_election"
             runElection "sample_data/small_election.txt"
